@@ -1,0 +1,670 @@
+var   
+  MyForm: TclForm;
+  MainPnl, habit1pnl, ustPanel,baslik1pnl,secimPanel,mypanel: TclProPanel;
+  butonlar: array[0..31] of TClProButton;
+  i, j: Integer;
+  baslik1btn:TClProButton;
+  gunSayisi, ilkGun, haftalikIndex: Integer;
+  hedefSatir: TclProPanel;
+  gunler: array[0..6] of String;
+  gunEtiketleri: array[0..6] of TclProLabel;
+  vScroll: TClVertScrollBox;
+  aylar: array[0..11] of String;
+  ayLabel: TClProLabel;
+  satir1Label, satir1, satir2, satir3, satir4, satir5, satir6: TclProPanel;
+  yilbaslik:tclprolabel;
+  elimage:tclproimage;
+  secimaliskanlikbtn1,secimaliskanlikbtn2,secimaliskanlikbtn3,secimaliskanlikbtn4:TClProButton;
+  Imagecircle,Imagecircle2,Imagecircle3,Imagecircle4:tclproimage;
+  secimkapatbtn:TClProButton;
+  mybuton1,mybuton2,mybuton3,mybuton4:TClProButton;
+  gunIndex, satirIndex: Integer;
+  bosLabel: TclProLabel;
+  habitbaslik:tclprolabel;
+  habitQuery: TClSQLiteQuery;
+  gelenHabitAdi: String;
+  habitId: Integer;
+  habitname:String;
+  habitListQuery:TClSQLiteQuery;
+  secilenHabitId: Integer; // Seçilen alışkanlık ID'si
+  secilenHabitName: String; // Seçilen alışkanlık adı
+  secilenHabitColor: String; // Seçilen alışkanlık rengi
+
+void CreateTableHabitskayit;
+{
+  try {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'HabitTracker.db3', '');
+    
+    Clomosy.DBSQLiteQuery.SQL.Text = 'DROP TABLE IF EXISTS HabitDays';
+    Clomosy.DBSQLiteQuery.OpenOrExecute();
+    
+    Clomosy.DBSQLiteQuery.SQL.Text = 
+      'CREATE TABLE HabitDays (' +
+      'ID INTEGER PRIMARY KEY AUTOINCREMENT,' + 
+      'habitId INTEGER,' + 
+      'year INTEGER,' + 
+      'month INTEGER,' + 
+      'day INTEGER '+')';
+    Clomosy.DBSQLiteQuery.OpenOrExecute();
+    
+    ShowMessage('HabitDays tablosu oluşturuldu!');
+  }
+  except 
+    ShowMessage('HabitDays tablosu oluşturma hatası: ' + LastExceptionMessage);
+  }
+}
+
+void CreateTableHabits;
+{
+  try {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'HabitTracker.db3', '');
+    
+    Clomosy.DBSQLiteQuery.SQL.Text = 'DROP TABLE IF EXISTS Habits'; //ekran açıldığında tabloyu silip yeniden oluşturuyorsun. Bu yüzden diğer kısımda eklediğin veri de silinmiş oluyor.
+    Clomosy.DBSQLiteQuery.OpenOrExecute();//Tabloları programın en başında create edip tekrar drop etmemen lazım
+    
+    Clomosy.DBSQLiteQuery.SQL.Text = 
+      'CREATE TABLE Habits (' +
+      'habitId INTEGER PRIMARY KEY AUTOINCREMENT,' + 
+      'habitName TEXT,' + 
+      'habitColor TEXT '+')';
+    Clomosy.DBSQLiteQuery.OpenOrExecute();
+    
+    Clomosy.DBSQLiteQuery.SQL.Text = 
+      'INSERT INTO Habits (habitName, habitColor) VALUES ' +
+      '(''Spor Yapmak'', ''#FF6B6B''),' +  // Kırmızı
+      '(''İngilizce Çalışmak'', ''#4ECDC4''),' +  // Yeşil
+      '(''Kitap Okumak'', ''#45B7D1''),' +  // Mavi
+      '(''Meditasyon'', ''#96CEB4''),' +  // Açık yeşil
+      '(''Su İçmek'', ''#FFEAA7''),' +  // Sarı
+      '(''Kod Yazmak'', ''#DDA0DD'')';  // Mor
+    Clomosy.DBSQLiteQuery.OpenOrExecute();
+    
+    ShowMessage('Habits tablosu ve örnek veriler oluşturuldu!');
+  }
+  except 
+    ShowMessage('Habits tablosu oluşturma hatası: ' + LastExceptionMessage);
+  }
+}
+
+void OnTakvimButonClick
+var
+  tiklananBtn: TClProButton;
+  hintStr: String;
+  habitIdStr, ayStr, gunStr: String;
+  secilenAy, secilenGun, secilenYil: Integer;
+  i, altCizgiSayisi: Integer;
+  parca: String;
+{
+  // Eğer henüz alışkanlık seçilmemişse uyarı ver
+  if (secilenHabitId == 0) {
+    ShowMessage('Önce bir alışkanlık seçin!');
+  }
+
+  tiklananBtn = TClProButton(MyForm.clSender);
+  hintStr = tiklananBtn.Hint;  // Örnek: "3_15" (ay_gün)
+
+  ayStr = '';
+  gunStr = '';
+  parca = '';
+  altCizgiSayisi = 0;
+
+  for (i = 1 to Length(hintStr)) {
+    if (hintStr[i] == '_') {
+      ayStr = parca;
+      parca = '';
+      altCizgiSayisi = altCizgiSayisi + 1;
+    } else {
+      parca = parca + hintStr[i];
+    }
+  }
+  gunStr = parca;
+
+  if ((ayStr <> '') && (gunStr <> '')) {
+    secilenAy = StrToInt(ayStr);
+    secilenGun = StrToInt(gunStr);
+    secilenYil = 2026;
+
+    try {
+      Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'HabitTracker.db3', '');
+      
+      // Önce bu tarihte bu alışkanlık için kayıt var mı kontrol et
+      Clomosy.DBSQLiteQuery.SQL.Text = 
+        'SELECT COUNT(*) as kayitSayisi FROM HabitDays WHERE ' +
+        'habitId = ' + IntToStr(secilenHabitId) + ' AND ' +
+        'year = ' + IntToStr(secilenYil) + ' AND ' +
+        'month = ' + IntToStr(secilenAy) + ' AND ' +
+        'day = ' + IntToStr(secilenGun);
+      Clomosy.DBSQLiteQuery.OpenOrExecute();
+      
+      if (Clomosy.DBSQLiteQuery.FieldByName('kayitSayisi').AsInteger == 0) {
+        // Kayıt yoksa ekle
+        Clomosy.DBSQLiteQuery.SQL.Text =
+          'INSERT INTO HabitDays (habitId, year, month, day) VALUES (' +
+          IntToStr(secilenHabitId) + ',' +
+          IntToStr(secilenYil) + ',' +
+          IntToStr(secilenAy) + ',' +
+          IntToStr(secilenGun) + ')';
+        Clomosy.DBSQLiteQuery.OpenOrExecute();
+
+        // Butonun rengini seçilen alışkanlık rengine değiştir
+        tiklananBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor(secilenHabitColor);
+        tiklananBtn.SetclProSettings(tiklananBtn.clProSettings);
+
+        ShowMessage(secilenHabitName + ' alışkanlığı için ' + 
+                   IntToStr(secilenGun) + '.' + IntToStr(secilenAy) + ' tarihi kaydedildi!');
+      } else {
+        // Kayıt varsa sil
+        Clomosy.DBSQLiteQuery.SQL.Text =
+          'DELETE FROM HabitDays WHERE ' +
+          'habitId = ' + IntToStr(secilenHabitId) + ' AND ' +
+          'year = ' + IntToStr(secilenYil) + ' AND ' +
+          'month = ' + IntToStr(secilenAy) + ' AND ' +
+          'day = ' + IntToStr(secilenGun);
+        Clomosy.DBSQLiteQuery.OpenOrExecute();
+
+        // Butonun rengini geri al
+        tiklananBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#FFFFFF'); // Beyaz
+        tiklananBtn.SetclProSettings(tiklananBtn.clProSettings);
+
+        ShowMessage(secilenHabitName + ' alışkanlığı için ' + 
+                   IntToStr(secilenGun) + '.' + IntToStr(secilenAy) + ' tarihi silindi!');
+      }
+    }
+    except {
+      ShowMessage('Hata oluştu: ' + LastExceptionMessage);
+    }
+  } 
+}
+}
+void AliskanlikButonlariOlustur
+var
+  habitName: String;
+  habitId: Integer;
+  habitColor: String;
+  habitQuery: TClSQLiteQuery;
+  yeniBtn: TClProButton;
+  habitIndex: Integer;
+{
+  try {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'HabitTracker.db3', '');
+
+    habitQuery = Clomosy.DBSQLiteQueryWith('SELECT habitId, habitName, habitColor FROM Habits ORDER BY habitId');
+    habitQuery.OpenOrExecute;
+
+    habitIndex = 1;
+    while (not habitQuery.Eof) {
+      habitId = habitQuery.FieldByName('habitId').AsInteger;
+      habitName = habitQuery.FieldByName('habitName').AsString;
+      habitColor = habitQuery.FieldByName('habitColor').AsString;
+
+      // Yeni alışkanlık butonu oluştur
+      yeniBtn = MyForm.AddNewProButton(secimPanel, 'habitBtn_' + IntToStr(habitId), habitName);
+      yeniBtn.Align = alTop;
+      yeniBtn.Margins.Top = 5;
+      yeniBtn.Width = 100;
+      yeniBtn.Height = 50;
+      yeniBtn.clProSettings.IsRound = True;
+      yeniBtn.clProSettings.FontSize = 14;
+      yeniBtn.clProSettings.BorderColor = clAlphaColor.clHexToColor(habitColor);
+      yeniBtn.clProSettings.BorderWidth = 3;
+      yeniBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor(habitColor);
+      yeniBtn.clProSettings.FontColor = clAlphaColor.clHexToColor('#FFFFFF');
+      yeniBtn.Hint = IntToStr(habitId) + '|' + habitColor; // Habit ID ve rengi Hint'e sakla
+      yeniBtn.SetclProSettings(yeniBtn.clProSettings);
+
+      MyForm.AddNewEvent(yeniBtn, tbeOnClick, 'OnHabitButtonClick');
+
+      habitIndex = habitIndex + 1;
+      habitQuery.Next;
+    }
+  }
+  except {
+    ShowMessage('Butonlar oluşturulurken hata: ' + LastExceptionMessage);
+  }
+}
+  }
+void KayitliGunleriIsaretle
+var
+  kayitQuery: TClSQLiteQuery;
+  kayitAy, kayitGun: Integer;
+  butonAdi: String;
+  hedefButon: TClProButton;
+{
+  try {
+    if (secilenHabitId == 0) 
+    
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'HabitTracker.db3', '');
+    
+    kayitQuery = Clomosy.DBSQLiteQueryWith(
+      'SELECT month, day FROM HabitDays WHERE habitId = ' + IntToStr(secilenHabitId) + 
+      ' AND year = 2026 ORDER BY month, day'
+    );
+    kayitQuery.OpenOrExecute;
+    
+    while (not kayitQuery.Eof) {
+      kayitAy = kayitQuery.FieldByName('month').AsInteger;
+      kayitGun = kayitQuery.FieldByName('day').AsInteger;
+      
+      // Buton adını oluştur (ay-1 çünkü array 0'dan başlar)
+      butonAdi = 'btn' + IntToStr(kayitAy - 1) + '_' + IntToStr(kayitGun - 1);
+      
+      // Butonu bul ve rengini değiştir
+      hedefButon = TClProButton(MyForm.FindComponent(butonAdi));
+      if (hedefButon <> nil) {
+        hedefButon.clProSettings.BackgroundColor = clAlphaColor.clHexToColor(secilenHabitColor);
+        hedefButon.SetclProSettings(hedefButon.clProSettings);
+      }
+      
+      kayitQuery.Next;
+    }
+  }
+  except {
+    ShowMessage('Kayıtlı günler işaretlenirken hata: ' + LastExceptionMessage);
+  }
+}
+  }
+void OnHabitButtonClick
+var
+  tiklananBtn: TClProButton;
+  tiklananHabitName: String;
+  tiklananHabitId: String;
+  tiklananHabitColor: String;
+  hintStr: String;
+  i, pipeIndex: Integer;
+{
+  tiklananBtn = TClProButton(MyForm.clSender);
+  tiklananHabitName = tiklananBtn.Text;
+  hintStr = tiklananBtn.Hint;
+  
+  // Hint'ten ID ve rengi al (manuel parsing)
+  pipeIndex = 0;
+  for (i = 1 to Length(hintStr)) {
+    if (hintStr[i] == '|') {
+      pipeIndex = i;
+      break;
+    }
+  }
+  
+  if (pipeIndex > 0) {
+    tiklananHabitId = Copy(hintStr, 1, pipeIndex - 1);
+    tiklananHabitColor = Copy(hintStr, pipeIndex + 1, Length(hintStr) - pipeIndex);
+  } else {
+    tiklananHabitId = hintStr;
+    tiklananHabitColor = '#90EE90'; // Varsayılan yeşil
+  }
+  
+  // Seçilen alışkanlık bilgilerini sakla
+  secilenHabitId = StrToInt(tiklananHabitId);
+  secilenHabitName = tiklananHabitName;
+  secilenHabitColor = tiklananHabitColor;
+  
+  // Başlığı güncelle
+  habitbaslik.Text = 'ALIŞKANLIK: ' + tiklananHabitName;
+  
+  // Seçim panelini gizle
+  secimPanel.Visible = false;
+  
+  // Kayıtlı günleri işaretle
+  KayitliGunleriIsaretle();
+  
+  ShowMessage(tiklananHabitName + ' alışkanlığı seçildi! Artık takvimde günlere tıklayabilirsiniz.');
+}
+
+
+void aliskanlikclick
+{
+  secimpanel.Visible = not secimpanel.Visible;
+}
+  
+function GunSayisi(ay: Integer; yil: Integer): Integer
+{
+  if ((ay == 1) || (ay == 3) || (ay == 5) || (ay == 7) || (ay == 8) || (ay == 10) || (ay == 12))
+    Result = 31
+  else if ((ay == 4) || (ay == 6) || (ay == 9) || (ay == 11))
+    Result = 30
+  else if (ay == 2)
+  {
+    if ((yil mod 4 == 0) && ((yil mod 100 <> 0) || (yil mod 400 == 0)))
+      Result = 29
+    else
+      Result = 28
+  }
+  else
+    Result = 0 
+}
+  
+function AyIlkGunuHaftaninKaci(ay: Integer; yil: Integer): Integer
+  var 
+  d, m, y, k, j, h,gun: Integer
+{
+  d = 1
+  if ay < 3
+  {
+    ay = ay + 12
+    yil = yil - 1
+  }
+
+  m = ay
+  y = yil mod 100
+  j = yil div 100
+
+  h = (d + (13*(m + 1)) div 5 + y + (y div 4) + (j div 4) + 5*j) mod 7
+  gun = (h + 5) mod 7 //
+  Result = gun
+}
+
+void TakvimCiz(ay,yil: Integer)
+var
+  gunSayisi, ilkGun, i, haftalikIndex: Integer;
+  hedefSatir: TclProPanel;
+  gunEtiketi: TclProLabel;
+{
+  gunSayisi = GunSayisi(ay, yil)
+  ilkGun = AyIlkGunuHaftaninKaci(ay, yil)
+
+  for i = 0 to gunSayisi - 1
+  {
+    haftalikIndex = i + ilkGun - 1
+
+    if (haftalikIndex < 7)  
+     hedefSatir = satir1
+    else if (haftalikIndex < 14)  
+    hedefSatir = satir2
+    else if (haftalikIndex < 21)  
+    hedefSatir = satir3
+    else if (haftalikIndex < 28)  
+    hedefSatir = satir4
+    else 
+    hedefSatir = satir5
+
+    gunEtiketi = MyForm.AddNewProLabel(
+      hedefSatir,
+      'lblGun_' + IntToStr(ay) + '_' + IntToStr(i + 1),
+      IntToStr(i + 1)
+    )
+
+    gunEtiketi.Align = alRight
+    gunEtiketi.Margins.Right = 18
+    gunEtiketi.Margins.Left = 3
+    gunEtiketi.Width = 30
+    gunEtiketi.clProSettings.FontSize = 14
+    gunEtiketi.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000')
+    gunEtiketi.clProSettings.FontVertAlign = palLeading
+    gunEtiketi.clProSettings.FontHorzAlign = palcenter
+    gunEtiketi.SetclProSettings(gunEtiketi.clProSettings)
+  }
+}
+
+{
+  MyForm = TclForm.Create(Self);
+
+  MainPnl = myForm.AddNewProPanel(myForm, 'MainPnl');
+  MainPnl.Align = alClient;
+  
+  MainPnl.Align=alCenter;
+  MainPnl.Height=630;
+  MainPnl.Width=400;
+  MainPnl.clProSettings.RoundHeight=40;
+  MainPnl.clProSettings.Roundwidth=40;
+  MainPnl.clProSettings.IsTransparent =False;
+  MainPnl.SetclProSettings(MainPnl.clProSettings); 
+  
+
+  habit1pnl = MyForm.AddNewProPanel(MainPnl, 'habit1pnl');
+  habit1pnl.Align = alClient;
+  habit1pnl.SetclProSettings(habit1pnl.clProSettings);
+   
+  baslik1pnl = MyForm.AddNewProPanel(habit1pnl, 'baslik1pnl');
+  baslik1pnl.Align = alTop;
+  baslik1pnl.Margins.left=11;
+  baslik1pnl.Height = 100;
+  baslik1pnl.width = 200;
+  baslik1pnl.clProSettings.BorderColor = clAlphaColor.clHexToColor('#cccccc');
+  baslik1pnl.clProSettings.BorderWidth = 1;
+  baslik1pnl.SetclProSettings(baslik1pnl.clProSettings);
+   
+
+  
+  yilbaslik = myform.AddNewProLabel(baslik1pnl,'yilbaslik','YILLIK ALIŞKANLIK TAKİBİ');
+  yilbaslik.Align = altop;
+  yilbaslik.margins.left=60;
+  yilbaslik.Width = 300;
+  yilbaslik.Height = 30;
+  yilbaslik.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  yilbaslik.clProSettings.FontSize = 20;
+  yilbaslik.clProSettings.FontVertAlign = palcenter;
+  yilbaslik.clProSettings.FontHorzAlign = palLeading;
+  yilbaslik.clProSettings.TextSettings.Font.Style = [fsBold];
+  yilbaslik.clProSettings.IsFill = True; 
+  yilbaslik.clProSettings.IsRound = True;
+ yilbaslik.SetclProSettings(yilbaslik.clProSettings);
+  
+  habitbaslik = myform.AddNewProLabel(baslik1pnl,'habitbaslik','ALIŞKANLIK:');
+  habitbaslik.Align = alcenter;
+  habitbaslik.margins.left=210;
+  habitbaslik.margins.right=30;
+  habitbaslik.Width = 300;
+  habitbaslik.Height = 30;
+  habitbaslik.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  habitbaslik.clProSettings.FontSize = 15;
+  habitbaslik.clProSettings.FontVertAlign = palcenter;
+  habitbaslik.clProSettings.FontHorzAlign = palLeading;
+  habitbaslik.clProSettings.TextSettings.Font.Style = [fsBold];
+  habitbaslik.clProSettings.IsFill = True; 
+  habitbaslik.clProSettings.IsRound = True;
+ habitbaslik.SetclProSettings(habitbaslik.clProSettings);
+  
+  
+  
+   
+   
+  baslik1btn = MyForm.AddNewProButton(baslik1pnl, 'baslik1btn', 'Alışkanlıklar');
+  baslik1btn.Align = alcenter;
+  baslik1btn.Width = 100;
+  baslik1btn.Height = 50;
+  baslik1btn.Margins.Right = 240;
+  baslik1btn.clProSettings.IsRound = True;
+  baslik1btn.clProSettings.FontSize = 14;
+  baslik1btn.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ea9eff');
+  baslik1btn.clProSettings.BorderWidth = 2;
+  baslik1btn.SetclProSettings(baslik1btn.clProSettings);
+  MyForm.AddNewEvent(baslik1btn, tbeOnClick, 'aliskanlikclick');
+ ////////////////////////////////////////////////////////////////////////////////
+  secimPanel=MyForm.AddNewProPanel(MainPnl,'secimPanel');
+  secimPanel.Align = AlCenter;
+  secimpanel.margins.right=170;
+  secimpanel.margins.bottom=200;
+  secimPanel.Width = 200;
+  secimPanel.Height =250;
+  secimPanel.clProSettings.IsRound = True;
+ secimPanel.visible=false;
+ secimPanel.SetclProSettings(secimPanel.clProSettings);
+   
+   
+   
+
+ 
+
+ ///////////////////////////////////////////////////////////////////////////////7
+ 
+ 
+  elImage = myForm.AddNewProImage(baslik1pnl, 'elImage');
+  elImage.Align = alcenter;
+  elimage.margins.right=140;
+  elImage.margins.top=25;
+  elImage.Width = 22;
+  elImage.Height = 24;
+  myForm.SetImage(elImage, 'https://i.imgur.com/4bxFXAo.png');
+  
+ 
+   
+ //////////////////////////////////////////////////////////////////////////////////////7
+  vScroll = MyForm.AddNewVertScrollBox(habit1pnl, 'vScroll');
+  vScroll.Align = alClient;
+
+ 
+  aylar = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+  
+  for (j = 0 to 11) {
+    
+    ustPanel = MyForm.AddNewProPanel(vScroll, 'ustPanel' + IntToStr(j));
+    ustPanel.Align = alTop;
+    ustPanel.Width = vScroll.Width;
+    ustPanel.Margins.Left = 0;
+    ustPanel.Margins.Right = 0;
+    ustPanel.Height = 400;
+    ustPanel.Margins.Top = 10;
+    ustPanel.clProSettings.RoundHeight = 10;
+    ustPanel.clProSettings.RoundWidth = 10;
+    ustPanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#cccccc');
+    ustPanel.clProSettings.BorderWidth = 2;
+    ustPanel.SetclProSettings(ustPanel.clProSettings);
+
+    ayLabel = MyForm.AddNewProLabel(ustPanel, 'ayLabel' + IntToStr(j), aylar[j] + ', 2026');
+    ayLabel.Align = alTop;
+    aylabel.Margins.left=20;
+    ayLabel.Height = 50;
+    ayLabel.clProSettings.FontSize = 18;
+    ayLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+    ayLabel.clProSettings.TextSettings.Font.Style = [fsBold];
+    ayLabel.SetclProSettings(ayLabel.clProSettings);
+
+    satir1Label = MyForm.AddNewProPanel(ustPanel, 'satir1Label' + IntToStr(j));
+    satir1Label.Align = alTop;
+    satir1Label.Height = 24;
+
+    gunler = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    for (i = 0 to 6) {
+      gunEtiketleri = MyForm.AddNewProLabel(satir1Label, 'lblGun' + IntToStr(j) + '_' + IntToStr(i), gunler[i]);
+      gunEtiketleri.Align = alLeft;
+      gunEtiketleri.Margins.left = 18;
+      gunEtiketleri.Margins.right= 3;
+      gunEtiketleri.Width = 30;
+      gunEtiketleri.clProSettings.FontSize = 14;
+      gunEtiketleri.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+      gunEtiketleri.clProSettings.FontVertAlign = palLeading;
+      gunEtiketleri.clProSettings.FontHorzAlign = palcenter;
+      gunEtiketleri.SetclProSettings(gunEtiketleri.clProSettings);
+    }
+
+    
+    satir1 = MyForm.AddNewProPanel(ustPanel, 'satir1' + IntToStr(j)); satir1.Align = alTop; satir1.margins.left = 12; satir1.Height = 40;
+    satir2 = MyForm.AddNewProPanel(ustPanel, 'satir2' + IntToStr(j)); satir2.Align = alTop; satir2.margins.left = 12; satir2.Height = 40;
+    satir3 = MyForm.AddNewProPanel(ustPanel, 'satir3' + IntToStr(j)); satir3.Align = alTop; satir3.margins.left = 12; satir3.Height = 40;
+    satir4 = MyForm.AddNewProPanel(ustPanel, 'satir4' + IntToStr(j)); satir4.Align = alTop; satir4.margins.left = 12; satir4.Height = 40;
+    satir5 = MyForm.AddNewProPanel(ustPanel, 'satir5' + IntToStr(j)); satir5.Align = alTop; satir5.margins.left = 12; satir5.Height = 40;
+    satir6 = MyForm.AddNewProPanel(ustPanel, 'satir6' + IntToStr(j)); satir6.Align = alTop; satir6.margins.left = 12; satir6.Height = 40;
+
+  
+    gunSayisi = GunSayisi(j + 1, 2026);
+    ilkGun = AyIlkGunuHaftaninKaci(j + 1, 2026); // 0: Pazartesi, 6: Pazar
+
+    
+    for (i = 0 to ilkGun - 1) {
+      bosLabel = MyForm.AddNewProLabel(satir1, 'lblBos' + IntToStr(j) + '_' + IntToStr(i), '');
+      bosLabel.Align = alLeft;
+      bosLabel.Width = 45;
+      bosLabel.Height = 32;
+      bosLabel.Margins.Right = 2;
+      bosLabel.Margins.Top = 4;
+      bosLabel.Margins.Left = 4;
+    }
+
+   
+    for (i = 0 to gunSayisi - 1) {
+      gunIndex = (i + ilkGun) mod 7; // 0: Pazartesi, 6: Pazar
+      satirIndex = (i + ilkGun) div 7; // 0: ilk satır, 1: ikinci satır, ...
+
+      if (satirIndex == 0) hedefSatir = satir1;
+      else if (satirIndex == 1) hedefSatir = satir2;
+      else if (satirIndex == 2) hedefSatir = satir3;
+      else if (satirIndex == 3) hedefSatir = satir4;
+      else if (satirIndex == 4) hedefSatir = satir5;
+      else hedefSatir = satir6;
+
+      butonlar = MyForm.AddNewProButton(hedefSatir, 'btn' + IntToStr(j) + '_' + IntToStr(i), IntToStr(i + 1));
+      butonlar.Hint = IntToStr(j + 1) + '_' + IntToStr(i + 1);
+      butonlar.Align = alLeft;
+      butonlar.Margins.Right = 2;
+      butonlar.Margins.Top = 4;
+      butonlar.Margins.Left = 4;
+      butonlar.Width = 45;
+      butonlar.Height = 32;
+      butonlar.clProSettings.PictureSource = 'https://i.imgur.com/exBB3ZA.png';
+      butonlar.clProSettings.PictureAutoFit = true;
+      butonlar.clProSettings.IsRound = true;
+      butonlar.clProSettings.FontSize = 9;
+      butonlar.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+      butonlar.SetclProSettings(butonlar.clProSettings);
+      MyForm.AddNewEvent(butonlar, tbeOnClick, 'OnTakvimButonClick');
+    }
+  }
+   
+  mypanel=myForm.AddNewProPanel(MainPnl,'mypanel');
+  mypanel.Align=alMostBottom;
+  mypanel.Align=alHorizontal;
+  mypanel.Height=200;
+  mypanel.Width=300;
+  mypanel.clProSettings.RoundHeight=20;
+  mypanel.clProSettings.Roundwidth=20;
+  mypanel.clProSettings.IsTransparent =False;
+  mypanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ffffff');
+  mypanel.clProSettings.BorderWidth = 2;
+  mypanel.SetclProSettings(mypanel.clProSettings); 
+   
+  mybuton1=myForm.AddNewProButton(mypanel, 'mybuton1', '');
+  mybuton1.Align = alLeft;
+  mybuton1.margins.left=50;
+  mybuton1.margins.bottom=130;
+  mybuton1.Width = 40;
+  mybuton1.Height = 40;
+  mybuton1.clProSettings.IsRound = True;
+  mybuton1.clProSettings.RoundHeight = 10;
+  mybuton1.clProSettings.RoundWidth = 10;
+  mybuton1.SetclProSettings(mybuton1.clProSettings);
+  myForm.SetImage(mybuton1,'https://i.imgur.com/KcmLm4h.png'); 
+  
+  mybuton2=myForm.AddNewProButton(mypanel, 'mybuton2', '');
+  mybuton2.Align = alLeft;
+  mybuton2.margins.left=45;
+  mybuton2.margins.bottom=130;
+  mybuton2.Width = 40;
+  mybuton2.Height = 40;
+  mybuton2.clProSettings.IsRound = True;
+  mybuton2.clProSettings.RoundHeight = 10;
+  mybuton2.clProSettings.RoundWidth = 10;
+  mybuton2.SetclProSettings(mybuton2.clProSettings);
+  myForm.SetImage(mybuton2,'https://i.imgur.com/mcpG1Ot.png'); 
+  
+  mybuton3=myForm.AddNewProButton(mypanel, 'mybuton3', '');
+  mybuton3.Align = alLeft;
+  mybuton3.margins.left=45;
+  mybuton3.margins.bottom=130;
+  mybuton3.Width = 40;
+  mybuton3.Height = 40;
+  mybuton3.clProSettings.IsRound = True;
+  mybuton3.clProSettings.RoundHeight = 10;
+  mybuton3.clProSettings.RoundWidth = 10;
+  mybuton3.SetclProSettings(mybuton3.clProSettings);
+  myForm.SetImage(mybuton3,'https://i.imgur.com/yOGrUe4.png'); 
+  
+    
+  mybuton4=myForm.AddNewProButton(mypanel, 'mybuton4', '');
+  mybuton4.Align = alMostRight;
+  mybuton4.margins.right=50;
+  mybuton4.margins.bottom=130;
+  mybuton4.Width = 40;
+  mybuton4.Height = 40;
+  mybuton4.clProSettings.IsRound = True;
+  mybuton4.clProSettings.RoundHeight = 10;
+  mybuton4.clProSettings.RoundWidth = 10;
+  mybuton4.SetclProSettings(mybuton4.clProSettings);
+  myForm.SetImage(mybuton4,'https://i.imgur.com/dKnXBVF.png'); 
+  
+  
+  CreateTableHabitskayit;
+  CreateTableHabits;
+  AliskanlikButonlariOlustur;
+  MyForm.Run;
+}

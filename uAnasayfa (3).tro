@@ -1,0 +1,749 @@
+var
+AnasayfaForm: TclForm;
+
+MainPnl,mypanel,mypanel1,mypanel2,hpanel,bpanel,secimPanel,secimPanel2,secimpanel3:TclProPanel;
+Label1,Label2: TCLProLabel;
+EmailEdit:TCLProEdit;
+mybuton1,mybuton2,mybuton3,mybuton4,btnresim,hayvanbuton,bitkibuton,secimKapatBtn,secimKapatBtn2,secimKapatBtn3:TClProButton;
+unit1:TCLUnit;
+yastikimg,iconImg:TClProImage;
+secenekBtn1: TClProButton;
+kontrolQuery: TClSQLiteQuery;
+i:integer;
+secilenHayvan: String;
+testBtn:TClProButton;
+secenekBtnArr2,secenekBtnArr,secenekBtnArr3: array[5] of TClProButton;
+secenekhintArr2,secenekhintArr,secenekHintArr3,secenekimageArr2,secenekimageArr,secenekimageArr3 : array of String;
+secenekYaziArr2: array[5] of String;
+hayvanKutuArr: array[5] of TClProPanel;
+helloImage,helloimage2:TClProImage;
+timerFadeOut,timerFadeOut2: TClTimer;
+saksiimg:TClProImage;
+timerBuyut, timerKucult : TClTimer;
+
+  void mybuton4click
+  {
+    Clomosy.RunUnit('mybuton4');
+  }
+  
+   void mybuton2click
+  {
+    Clomosy.RunUnit('mybuton2');
+  }
+
+
+void mybuton3click
+  {
+    Clomosy.RunUnit('mybuton3');
+  }
+
+
+
+void StartFadeOut;
+{
+  clAnimateFloat(helloImage, 'Opacity', 0, 2, 0, 0); // 2 saniyede kaybolur
+  timerFadeOut.Enabled = false;
+}
+
+void StartFadeOut2;
+{
+  clAnimateFloat(helloImage2, 'Opacity', 0, 2, 0, 0); // 2 saniyede kaybolur
+  timerFadeOut2.Enabled = false;
+}
+
+
+
+
+
+
+void hayvanbutonClick
+{
+  secimPanel.Visible = true;
+}
+
+void resimbutonClick
+{
+  secimPanel2.Visible = true;
+}
+void bitkibutonClick
+{
+  secimPanel3.Visible = true;
+}
+////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////
+ void secimKapatBtnclick;
+{
+  secimPanel.Visible = false;
+}
+
+void secimKapatBtnclick2;
+{
+  secimPanel2.Visible = false;
+}
+
+void secimKapatBtnclick3;
+{
+  secimPanel3.Visible = false;
+}
+
+
+void CreateTablePuan;
+{
+  try
+  {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'HabitTracker.db3', '');
+    Clomosy.DBSQLiteQuery.Sql.Text = 'CREATE TABLE IF NOT EXISTS PuanKayitlari ('+
+
+      'id INTEGER PRIMARY KEY AUTOINCREMENT,'+
+
+      'puan INTEGER)';
+
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+  }
+   except {
+
+    ShowMessage('Tablo oluşturulurken hata oluştu: ' + LastExceptionMessage);
+
+  }
+}
+}
+
+
+
+
+/////////////7SORUN SORUN SORUN/////////////////////////////////////////////////////////////////////////////7
+void secenekBtnTiklandiinsan
+
+ var clickedBtn: TClProButton;
+{
+  clickedBtn = TClProButton(AnasayfaForm.ClSender); // Tıklanan buton
+
+  try {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'ClomosyDatabase.db3', '');
+
+    kontrolQuery = Clomosy.DBSQLiteQueryWith('SELECT * FROM satinalinanlar WHERE buttonName = ' + QuotedStr(clickedBtn.Hint));
+    kontrolQuery.OpenOrExecute;
+  
+    if kontrolQuery.Found {
+   
+      ShowMessage('Bu profili satın almışsınız');
+      
+       if (clickedBtn.Hint == 'btnpp1'){
+         AnasayfaForm.SetImage(btnresim, 'https://i.imgur.com/WjyjNqj.png');
+       }else if (clickedBtn.Hint == 'btnpp2'){
+         AnasayfaForm.SetImage(btnresim, 'https://i.imgur.com/jmjLukD.png');
+       }else if (clickedBtn.Hint == 'btnpp3')  {
+          AnasayfaForm.SetImage(btnresim, 'https://i.imgur.com/XEV1Z8v.png');
+       }else if (clickedBtn.Hint == 'btnpp4') {
+          AnasayfaForm.SetImage(btnresim, 'https://i.imgur.com/Xb00oQ7.png');
+       }else if(clickedBtn.Hint == 'btnpp5'){
+         AnasayfaForm.SetImage(btnresim, 'https://i.imgur.com/EL8rUNs.png');
+       }
+                 
+    }  
+    else {
+      ShowMessage('Bu profili satın almamışsınız');
+    }
+  }
+  except {
+    ShowMessage('Kontrol sırasında hata: ' + LastExceptionMessage);
+  }
+}
+
+}  
+   
+      
+
+void secenekBtnTiklandihayvan
+
+ var clickedBtn: TClProButton;
+{
+  clickedBtn = TClProButton(AnasayfaForm.ClSender); // Tıklanan buton
+
+  try {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'ClomosyDatabase.db3', '');
+
+    kontrolQuery = Clomosy.DBSQLiteQueryWith('SELECT * FROM satinalinanlar WHERE buttonName = ' + QuotedStr(clickedBtn.Hint));
+    kontrolQuery.OpenOrExecute;
+  
+    if kontrolQuery.Found {
+   
+      ShowMessage('Bu hayvanı satın almışsınız');
+      
+       if (clickedBtn.Hint == 'btnani1'){
+         AnasayfaForm.SetImage(hayvanbuton, 'https://i.imgur.com/Ze6FaOu.png');
+       }else if (clickedBtn.Hint == 'btnani2'){
+         AnasayfaForm.SetImage(hayvanbuton, 'https://i.imgur.com/MRrpLzP.png');
+       }else if (clickedBtn.Hint == 'btnani3')  {
+          AnasayfaForm.SetImage(hayvanbuton, 'https://i.imgur.com/J2hhRQK.png');
+       }else if (clickedBtn.Hint == 'btnani4') {
+          AnasayfaForm.SetImage(hayvanbuton, 'https://i.imgur.com/szz8CHC.png');
+       }else if(clickedBtn.Hint == 'btnani5'){
+         AnasayfaForm.SetImage(hayvanbuton, 'https://i.imgur.com/s9FRp40.png');
+       }
+                 
+      
+    }
+    else {
+      ShowMessage('Bu hayvanı satın almamışsınız');
+    }
+  }
+  except {
+    ShowMessage('Kontrol sırasında hata: ' + LastExceptionMessage);
+  }
+}
+
+} 
+////////////////////////////////////////////////////////////////////////////////////////////////////7   
+      
+void secenekBtnTiklandibitki
+
+ var clickedBtn: TClProButton;
+{
+  clickedBtn = TClProButton(AnasayfaForm.ClSender); // Tıklanan buton
+
+  try {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'ClomosyDatabase.db3', '');
+
+    kontrolQuery = Clomosy.DBSQLiteQueryWith('SELECT * FROM satinalinanlar WHERE buttonName = ' + QuotedStr(clickedBtn.Hint));
+    kontrolQuery.OpenOrExecute;
+  
+    if kontrolQuery.Found {
+   
+      ShowMessage('Bu bitkiyi satın almışsınız');
+      
+       if (clickedBtn.Hint == 'btnbit1'){
+         AnasayfaForm.SetImage(bitkibuton, 'https://i.imgur.com/wAWb0YJ.png');
+       }else if (clickedBtn.Hint == 'btnbit2'){
+         AnasayfaForm.SetImage(bitkibuton, 'https://i.imgur.com/gYg71fT.png');
+       }else if (clickedBtn.Hint == 'btnbit3')  {
+          AnasayfaForm.SetImage(bitkibuton, 'https://i.imgur.com/aczfu0o.png');
+       }else if (clickedBtn.Hint == 'btnbit4') {
+          AnasayfaForm.SetImage(bitkibuton, 'https://i.imgur.com/BA6aPDJ.png');
+       }else if(clickedBtn.Hint == 'btnbit5'){
+         AnasayfaForm.SetImage(bitkibuton, 'https://i.imgur.com/XNAWzuO.png');
+       }
+                 
+      
+    }
+    else {
+      ShowMessage('Bu bitkiyi satın almamışsınız');
+    }
+  }
+  except {
+    ShowMessage('Kontrol sırasında hata: ' + LastExceptionMessage);
+  }
+}
+
+} 
+
+
+
+
+   
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////777
+
+{
+AnasayfaForm=TclForm.Create(Self);
+AnasayfaForm.SetFormBGImage('https://i.imgur.com/tyHmjs5.png');
+
+
+
+
+
+ 
+  
+MainPnl=AnasayfaForm.AddNewProPanel(AnasayfaForm,'MainPnl');
+MainPnl.Align=alCenter;
+MainPnl.Height=630;
+MainPnl.Width=400;
+MainPnl.clProSettings.RoundHeight=40;
+MainPnl.clProSettings.Roundwidth=40;
+MainPnl.clProSettings.IsTransparent =False;
+MainPnl.SetclProSettings(MainPnl.clProSettings); 
+
+ 
+
+
+mypanel1=AnasayfaForm.AddNewProPanel(AnasayfaForm,'mypanel1');
+mypanel1.Align=almosttop;
+mypanel1.Align=alHorizontal;
+mypanel1.Height=150;
+mypanel1.Width=200;
+mypanel1.clProSettings.IsTransparent =True;
+mypanel1.SetclProSettings(mypanel1.clProSettings); 
+
+
+
+
+btnresim=AnasayfaForm.AddNewProButton(mypanel1,'btnresim', '');
+btnresim.Align = alcenter;
+btnresim.Width = 250;
+btnresim.Height = 130;
+btnresim.clProSettings.IsRound = True;
+btnresim.clProSettings.RoundHeight = 10;
+btnresim.clProSettings.RoundWidth = 10;
+btnresim.SetclProSettings(btnresim.clProSettings);
+AnasayfaForm.SetImage(btnresim,'https://i.imgur.com/kvaKr8c.png'); 
+
+
+Label1 = AnasayfaForm.AddNewProLabel(mypanel1,'Label1','kullanıcı1');
+
+Label1.Align=albottom;
+label1.margins.left=153;
+Label1.Width=50;
+Label1.Height=50;
+Label1.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+Label1.clProSettings.FontSize = 15;
+Label1.clProSettings.TextSettings.Font.Style = [fsBold];
+Label1.SetclProSettings(Label1.clProSettings); 
+
+
+ hpanel=AnasayfaForm.AddNewProPanel(MainPnl,'hpanel');
+ hpanel.Align=alcenter;
+ hpanel.margins.right=150;
+ hpanel.margins.left=4;     
+ hpanel.Height=300;
+ hpanel.Width=240;
+ hpanel.margins.bottom=70;
+ //hpanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#3a32a8');
+ //hpanel.clProSettings.BorderWidth = 2;
+ hpanel.clProSettings.IsTransparent =true;;
+ hpanel.SetclProSettings(hpanel.clProSettings); 
+  
+ bpanel=AnasayfaForm.AddNewProPanel(MainPnl,'bpanel');
+ bpanel.Align=alcenter;
+ //bpanel.margins.right=400;
+ bpanel.margins.left=220;     
+ bpanel.Height=350;
+ bpanel.Width=150;
+ bpanel.margins.bottom=70;
+ //bpanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#3a32a8');
+ //bpanel.clProSettings.BorderWidth = 2;
+ bpanel.clProSettings.IsTransparent =true;;
+ bpanel.SetclProSettings(bpanel.clProSettings); 
+  
+  
+  
+  
+  
+  
+ ////ıvır zıvır//////////////////////////////////////////////////////////////////////////// 
+ yastikimg =AnasayfaForm.AddNewProImage(hpanel, 'yastikimg' );
+ yastikimg.Align = alMostBottom;
+ yastikimg.Width = 200;
+ yastikimg.Height = 200;
+ AnasayfaForm.SetImage(yastikimg, 'https://i.imgur.com/muV28t3.png');
+/////////////////////////////////////////////////////////////////////////////7 
+ helloImage = AnasayfaForm.AddNewProImage(MainPnl, 'helloImage');
+ helloImage.Align = alCenter;
+ helloImage.margins.bottom=300;
+ helloImage.Height=60;
+ helloImage.Width=60;
+ helloImage.clProSettings.PictureSource = 'https://i.imgur.com/fs7KLHN.png'; 
+ helloImage.clProSettings.PictureAutoFit = true;
+ helloImage.SetclProSettings(helloImage.clProSettings);
+ helloImage.Opacity = 0;
+
+  // Fade-in
+  clAnimateFloatWait(helloImage, 'Opacity', 1, 2, 0, 0); 
+
+  // Fade-out'u geciktirmek için Timer başlat
+  timerFadeOut = AnasayfaForm.AddNewTimer(AnasayfaForm, 'timerFadeOut', 2000); 
+  timerFadeOut.Enabled = true;
+  AnasayfaForm.AddNewEvent(timerFadeOut, tbeOnTimer, 'StartFadeOut');
+
+
+helloImage2 = AnasayfaForm.AddNewProImage(MainPnl, 'helloImage2');
+ helloImage2.Align = alCenter;
+ helloImage2.margins.bottom=300;
+  helloImage2.margins.left=130;
+ helloImage2.Height=60;
+ helloImage2.Width=60;
+ helloImage2.clProSettings.PictureSource = 'https://i.imgur.com/fsirCd8.png'; 
+ helloImage2.clProSettings.PictureAutoFit = true;
+ helloImage2.SetclProSettings(helloImage2.clProSettings);
+
+
+
+// Fade-in
+  clAnimateFloatWait(helloImage2, 'Opacity', 1, 2, 0, 0); 
+
+  // Fade-out'u geciktirmek için Timer başlat
+  timerFadeOut2 = AnasayfaForm.AddNewTimer(AnasayfaForm, 'timerFadeOut2', 2000); 
+  timerFadeOut2.Enabled = true;
+  AnasayfaForm.AddNewEvent(timerFadeOut2, tbeOnTimer, 'StartFadeOut2');
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+  
+ hayvanbuton=AnasayfaForm.AddNewProButton(hpanel,'hayvanbuton','');
+ hayvanbuton.Align = alCenter;
+ hayvanbuton.Margins.top=100;
+ hayvanbuton.Height = 150;
+ hayvanbuton.Width = 200;
+ hayvanbuton.Margins.Bottom = 5;
+ hayvanbuton.clProSettings.IsFill = True;
+ hayvanbuton.clProSettings.FontVertAlign = palLeading;
+ hayvanbuton.clProSettings.FontHorzAlign = palcenter;
+ hayvanbuton.clProSettings.PictureAutoFit = True;
+ hayvanbuton.SetclProSettings(hayvanbuton.clProSettings);
+ AnasayfaForm.SetImage(hayvanbuton,'https://i.imgur.com/MRrpLzP.png'); 
+
+ bitkibuton=AnasayfaForm.AddNewProButton(bpanel,'bitkibuton','');
+  bitkibuton.Align = alCenter;
+  bitkibuton.Margins.top=60;
+  bitkibuton.Height = 100;
+  bitkibuton.Width = 100;
+  bitkibuton.clProSettings.IsFill = True;
+  bitkibuton.clProSettings.FontVertAlign = palLeading;
+  bitkibuton.clProSettings.FontHorzAlign = palcenter;
+  bitkibuton.clProSettings.PictureAutoFit = True;
+  bitkibuton.clProSettings.PictureSource = 'https://i.imgur.com/zHP48Zd.png';
+ bitkibuton.SetclProSettings(bitkibuton.clProSettings);
+ 
+ 
+
+ saksiimg =AnasayfaForm.AddNewProImage(bpanel, 'saksiimg' );
+ saksiimg.Align = albottom;
+ saksiimg.margins.Bottom=128;
+ saksiimg.Width = 70;
+ saksiimg.Height = 70;
+ AnasayfaForm.SetImage(saksiimg, 'https://i.imgur.com/xmv9NWm.png');
+ 
+
+
+
+
+
+
+
+//////////PET İÇİN/////////////////////////////////7
+ secimPanel=AnasayfaForm.AddNewProPanel(MainPnl,'secimPanel');
+ secimPanel.Align = AlCenter;
+ secimPanel.Width = 250;
+ secimPanel.Height = 380;
+ secimPanel.clProSettings.IsRound = True;
+ secimPanel.clProSettings.RoundHeight = 10;
+ secimPanel.clProSettings.RoundWidth = 10;
+ secimPanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#968fff');
+ secimPanel.clProSettings.BorderWidth = 3;
+ secimPanel.visible=false;
+ secimPanel.SetclProSettings(secimPanel.clProSettings);
+ 
+ 
+ ///////////////İCON İÇİN///////////////////////////////
+ secimPanel2=AnasayfaForm.AddNewProPanel(MainPnl,'secimPanel2');
+ secimPanel2.Align = AlCenter;
+ secimPanel2.Width = 250;
+ secimPanel2.Height = 380;
+ secimPanel2.clProSettings.IsRound = True;
+ secimPanel2.clProSettings.RoundHeight = 10;
+ secimPanel2.clProSettings.RoundWidth = 10;
+ secimPanel2.clProSettings.BorderColor = clAlphaColor.clHexToColor('#968fff');
+ secimPanel2.clProSettings.BorderWidth = 3;
+ secimPanel2.visible=false;
+ secimPanel2.SetclProSettings(secimPanel2.clProSettings);
+ /////////////////////bitki//////////////////////////////////////7
+ 
+ secimPanel3=AnasayfaForm.AddNewProPanel(MainPnl,'secimPanel3');
+ secimPanel3.Align = AlCenter;
+ secimPanel3.Width = 250;
+ secimPanel3.Height = 380;
+ secimPanel3.clProSettings.IsRound = True;
+ secimPanel3.clProSettings.RoundHeight = 10;
+ secimPanel3.clProSettings.RoundWidth = 10;
+ secimPanel3.clProSettings.BorderColor = clAlphaColor.clHexToColor('#968fff');
+ secimPanel3.clProSettings.BorderWidth = 3;
+ secimPanel3.visible=false;
+ secimPanel3.SetclProSettings(secimPanel3.clProSettings);
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ //////////////////////////////////////////////////////////////////
+ secimKapatBtn2 = AnasayfaForm.AddNewProButton(secimPanel2, 'secimKapatBtn2', '');
+  secimKapatBtn2.Align = alMostRight;
+  secimKapatBtn2.Height = 60;
+  secimKapatBtn2.Width = 60;
+  secimKapatBtn2.Margins.Bottom = 330;
+  //secimKapatBtn.Margins.right = 5;
+  secimKapatBtn2.clProSettings.IsRound = True;
+  secimKapatBtn2.clProSettings.RoundHeight = 10;
+  secimKapatBtn2.clProSettings.RoundWidth = 10;
+  secimKapatBtn2.SetclProSettings(secimKapatBtn2.clProSettings);
+  AnasayfaForm.SetImage(secimKapatBtn2,'https://i.imgur.com/twqkoLB.png')
+ AnasayfaForm.AddNewEvent(secimKapatBtn2, tbeOnClick, 'secimKapatBtnclick2');
+ 
+ 
+ 
+
+ secimKapatBtn = AnasayfaForm.AddNewProButton(secimPanel, 'secimKapatBtn', '');
+  secimKapatBtn.Align = alMostRight;
+  secimKapatBtn.Height = 60;
+  secimKapatBtn.Width = 60;
+  secimKapatBtn.Margins.Bottom = 330;
+  secimKapatBtn.clProSettings.IsRound = True;
+  secimKapatBtn.clProSettings.RoundHeight = 10;
+  secimKapatBtn.clProSettings.RoundWidth = 10;
+  secimKapatBtn.SetclProSettings(secimKapatBtn.clProSettings);
+  AnasayfaForm.SetImage(secimKapatBtn,'https://i.imgur.com/twqkoLB.png')
+ AnasayfaForm.AddNewEvent(secimKapatBtn, tbeOnClick, 'secimKapatBtnclick');
+ 
+ 
+ secimKapatBtn3 = AnasayfaForm.AddNewProButton(secimPanel3, 'secimKapatBtn3', '');
+  secimKapatBtn3.Align = alMostRight;
+  secimKapatBtn3.Height = 60;
+  secimKapatBtn3.Width = 60;
+  secimKapatBtn3.Margins.Bottom = 330;
+  secimKapatBtn3.clProSettings.IsRound = True;
+  secimKapatBtn3.clProSettings.RoundHeight = 10;
+  secimKapatBtn3.clProSettings.RoundWidth = 10;
+  secimKapatBtn3.SetclProSettings(secimKapatBtn3.clProSettings);
+  AnasayfaForm.SetImage(secimKapatBtn3,'https://i.imgur.com/twqkoLB.png')
+ AnasayfaForm.AddNewEvent(secimKapatBtn3, tbeOnClick, 'secimKapatBtnclick3');
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7 
+ 
+   secenekhintArr = ['btnpp1','btnpp2','btnpp3','btnpp4','btnpp5'];
+    
+    secenekimageArr= ['https://i.imgur.com/WjyjNqj.png',
+   'https://i.imgur.com/jmjLukD.png',
+   'https://i.imgur.com/XEV1Z8v.png',
+   'https://i.imgur.com/Xb00oQ7.png',
+   'https://i.imgur.com/EL8rUNs.png'
+   
+   ];
+   
+ 
+for (i = 0 to 4)
+{
+  
+  hayvanKutuArr[i] = AnasayfaForm.AddNewProPanel(secimPanel2, 'insanKutu' + IntToStr(i+1));
+  hayvanKutuArr[i].Align = alTop;
+  hayvanKutuArr[i].Height = 70;
+  hayvanKutuArr[i].Margins.Top = 5;
+  hayvanKutuArr[i].Margins.left=50;
+  hayvanKutuArr[i].clProSettings.BackGroundColor = clAlphaColor.clHexToColor('#ffffff'); // kutu rengi
+  hayvanKutuArr[i].clProSettings.BorderColor = clAlphaColor.clHexToColor('#cccccc');     // kenarlık
+  hayvanKutuArr[i].clProSettings.BorderWidth = 2;
+  hayvanKutuArr[i].clProSettings.RoundHeight = 10;
+  hayvanKutuArr[i].clProSettings.RoundWidth = 10;
+  hayvanKutuArr[i].SetclProSettings(hayvanKutuArr[i].clProSettings);
+
+  
+  secenekBtnArr[i] = AnasayfaForm.AddNewProButton(hayvanKutuArr[i], 'secenekBtninsan' + IntToStr(i+1), '');
+  secenekBtnArr[i].Align = alClient;
+  secenekBtnArr[i].Hint = secenekHintArr[i];
+
+  secenekBtnArr[i].clProSettings.PictureAutoFit = true;
+  secenekBtnArr[i].clProSettings.IsFill = true;
+  secenekBtnArr[i].SetclProSettings(secenekBtnArr[i].clProSettings);
+  AnasayfaForm.SetImage(secenekBtnArr[i], secenekImageArr[i]);
+  
+  
+
+  AnasayfaForm.AddNewEvent(secenekBtnArr[i], tbeOnClick, 'secenekBtnTiklandiinsan');
+}
+
+
+  
+ 
+ 
+ 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+secenekhintArr2 = ['btnani1','btnani2','btnani3','btnani4','btnani5'];
+secenekimageArr2 = [
+    'https://i.imgur.com/Ze6FaOu.png',
+   'https://i.imgur.com/MRrpLzP.png',
+   'https://i.imgur.com/J2hhRQK.png',
+   'https://i.imgur.com/szz8CHC.png',
+   'https://i.imgur.com/s9FRp40.png'
+   ];
+   
+ 
+for (i = 0 to 4)
+{
+ 
+  hayvanKutuArr[i] = AnasayfaForm.AddNewProPanel(secimPanel, 'hayvanKutu' + IntToStr(i+1));
+  hayvanKutuArr[i].Align = alTop;
+  hayvanKutuArr[i].Height = 70;
+  hayvanKutuArr[i].Margins.Top = 5;
+  hayvanKutuArr[i].Margins.left=50;
+  hayvanKutuArr[i].clProSettings.BackGroundColor = clAlphaColor.clHexToColor('#ffffff'); // kutu rengi
+  hayvanKutuArr[i].clProSettings.BorderColor = clAlphaColor.clHexToColor('#cccccc');     // kenarlık
+  hayvanKutuArr[i].clProSettings.BorderWidth = 2;
+  hayvanKutuArr[i].clProSettings.RoundHeight = 10;
+  hayvanKutuArr[i].clProSettings.RoundWidth = 10;
+  hayvanKutuArr[i].SetclProSettings(hayvanKutuArr[i].clProSettings);
+
+  
+  secenekBtnArr2[i] = AnasayfaForm.AddNewProButton(hayvanKutuArr[i], 'secenekBtnhayvan' + IntToStr(i+1), '');
+  secenekBtnArr2[i].Align = alClient;
+  secenekBtnArr2[i].Hint = secenekHintArr2[i];
+
+  secenekBtnArr2[i].clProSettings.PictureAutoFit = true;
+  secenekBtnArr2[i].clProSettings.IsFill = true;
+  secenekBtnArr2[i].SetclProSettings(secenekBtnArr2[i].clProSettings);
+  AnasayfaForm.SetImage(secenekBtnArr2[i], secenekImageArr2[i]);
+  
+  
+
+  AnasayfaForm.AddNewEvent(secenekBtnArr2[i], tbeOnClick, 'secenekBtnTiklandihayvan');
+}
+//////////////////////////bitkibitkibitki//////////////////////////////////////////////////////////////
+
+secenekhintArr3=['btnbit1','btnbit2','btnbit3','btnbit4','btnbit5'];
+   secenekimageArr3 = [
+    'https://i.imgur.com/wAWb0YJ.png',
+   'https://i.imgur.com/gYg71fT.png',
+   'https://i.imgur.com/aczfu0o.png',
+   'https://i.imgur.com/BA6aPDJ.png',
+   'https://i.imgur.com/XNAWzuO.png'
+   ];
+ 
+for (i = 0 to 4)
+{
+ 
+  hayvanKutuArr[i] = AnasayfaForm.AddNewProPanel(secimpanel3, 'bitkikutu' + IntToStr(i+1));
+  hayvanKutuArr[i].Align = alTop;
+  hayvanKutuArr[i].Height = 70;
+  hayvanKutuArr[i].Margins.Top = 5;
+  hayvanKutuArr[i].Margins.left=50;
+  hayvanKutuArr[i].clProSettings.BackGroundColor = clAlphaColor.clHexToColor('#ffffff'); // kutu rengi
+  hayvanKutuArr[i].clProSettings.BorderColor = clAlphaColor.clHexToColor('#cccccc');     // kenarlık
+  hayvanKutuArr[i].clProSettings.BorderWidth = 2;
+  hayvanKutuArr[i].clProSettings.RoundHeight = 10;
+  hayvanKutuArr[i].clProSettings.RoundWidth = 10;
+  hayvanKutuArr[i].SetclProSettings(hayvanKutuArr[i].clProSettings);
+
+  
+  secenekBtnArr3[i] = AnasayfaForm.AddNewProButton(hayvanKutuArr[i], 'secenekBtnbitki' + IntToStr(i+1), '');
+  secenekBtnArr3[i].Align = alClient;
+  secenekBtnArr3[i].Hint = secenekHintArr3[i];
+
+  secenekBtnArr3[i].clProSettings.PictureAutoFit = true;
+  secenekBtnArr3[i].clProSettings.IsFill = true;
+  secenekBtnArr3[i].SetclProSettings(secenekBtnArr3[i].clProSettings);
+  AnasayfaForm.SetImage(secenekBtnArr3[i], secenekImageArr3[i]);
+  
+  
+
+  AnasayfaForm.AddNewEvent(secenekBtnArr3[i], tbeOnClick, 'secenekBtnTiklandibitki');
+}
+
+
+
+
+
+
+
+ //////BUTON//////////////////////////////////////////////////////////////////7
+  
+mypanel=AnasayfaForm.AddNewProPanel(MainPnl,'mypanel');
+mypanel.Align=alMostBottom;
+mypanel.Align=alHorizontal;
+mypanel.Height=200;
+mypanel.Width=300;
+mypanel.clProSettings.RoundHeight=20;
+mypanel.clProSettings.Roundwidth=20;
+mypanel.clProSettings.IsTransparent =False;
+mypanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ffffff');
+mypanel.clProSettings.BorderWidth = 2;
+mypanel.SetclProSettings(mypanel.clProSettings); 
+
+mybuton1=AnasayfaForm.AddNewProButton(mypanel, 'mybuton1', '');
+mybuton1.Align = alLeft;
+mybuton1.margins.left=50;
+mybuton1.margins.bottom=130;
+mybuton1.Width = 40;
+mybuton1.Height = 40;
+mybuton1.clProSettings.IsRound = True;
+mybuton1.clProSettings.RoundHeight = 10;
+mybuton1.clProSettings.RoundWidth = 10;
+mybuton1.SetclProSettings(mybuton1.clProSettings);
+AnasayfaForm.SetImage(mybuton1,'https://i.imgur.com/KcmLm4h.png'); 
+
+mybuton2=AnasayfaForm.AddNewProButton(mypanel, 'mybuton2', '');
+mybuton2.Align = alLeft;
+mybuton2.margins.left=45;
+mybuton2.margins.bottom=130;
+mybuton2.Width = 40;
+mybuton2.Height = 40;
+mybuton2.clProSettings.IsRound = True;
+mybuton2.clProSettings.RoundHeight = 10;
+mybuton2.clProSettings.RoundWidth = 10;
+mybuton2.SetclProSettings(mybuton2.clProSettings);
+AnasayfaForm.SetImage(mybuton2,'https://i.imgur.com/mcpG1Ot.png'); 
+
+mybuton3=AnasayfaForm.AddNewProButton(mypanel, 'mybuton3', '');
+mybuton3.Align = alLeft;
+mybuton3.margins.left=45;
+mybuton3.margins.bottom=130;
+mybuton3.Width = 40;
+mybuton3.Height = 40;
+mybuton3.clProSettings.IsRound = True;
+mybuton3.clProSettings.RoundHeight = 10;
+mybuton3.clProSettings.RoundWidth = 10;
+mybuton3.SetclProSettings(mybuton3.clProSettings);
+AnasayfaForm.SetImage(mybuton3,'https://i.imgur.com/yOGrUe4.png'); 
+AnasayfaForm.AddNewEvent(mybuton3,tbeOnClick,'mybuton3click')
+  
+mybuton4=AnasayfaForm.AddNewProButton(mypanel, 'mybuton4', '');
+mybuton4.Align = alMostRight;
+mybuton4.margins.right=50;
+mybuton4.margins.bottom=130;
+mybuton4.Width = 40;
+mybuton4.Height = 40;
+mybuton4.clProSettings.IsRound = True;
+mybuton4.clProSettings.RoundHeight = 10;
+mybuton4.clProSettings.RoundWidth = 10;
+mybuton4.SetclProSettings(mybuton4.clProSettings);
+AnasayfaForm.SetImage(mybuton4,'https://i.imgur.com/dKnXBVF.png'); 
+
+
+
+
+CreateTablePuan;
+  AnasayfaForm.AddNewEvent(mybuton3,tbeOnClick,'mybuton3click');
+AnasayfaForm.AddNewEvent(mybuton4,tbeOnClick,'mybuton4click');
+  AnasayfaForm.AddNewEvent(mybuton2,tbeOnClick,'mybuton2click');
+AnasayfaForm.AddNewEvent(btnresim, tbeOnClick, 'resimbutonClick');
+AnasayfaForm.AddNewEvent(hayvanbuton, tbeOnClick, 'hayvanbutonClick');
+AnasayfaForm.AddNewEvent(bitkibuton, tbeOnClick, 'bitkibutonClick');
+AnasayfaForm.run;  
+ 
+  
+} 
+
+
+
+
+
+

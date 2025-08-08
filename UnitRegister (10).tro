@@ -1,0 +1,256 @@
+var
+UnitReForm:TCLForm;
+EmailEdit,EmailEdit1,ParolaEdit:TCLProEdit;
+LoginUyeOlBtn,HiddenPasswordBtn,NormalPasswordBtn:TClProButton;
+MainPnl:TCLProPanel;
+TCLLogo:TCLProImage;
+EmailImg,PasswordImg:TCLProImage;
+MyLabel1:TClProLabel;
+Baglanti: DBSQLiteConnection;
+ email, username, sifre: String;
+
+void InsertToDatabase;
+{
+  if ((EmailEdit.Text == '') || (EmailEdit1.Text == '') ||  (ParolaEdit.Text == ''))
+    ShowMessage('Lütfen tüm alanları doldurun.');
+    else
+{
+  try {
+    Clomosy.DBSQLiteQuery.SQL.Text = 'INSERT INTO Users (userEmail,userName,userPassword) VALUES (' +
+      QuotedStr(EmailEdit.Text) + ', ' +
+      QuotedStr(EmailEdit1.Text) + ', ' +
+      QuotedStr(ParolaEdit.Text) + ')';
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+    ShowMessage('Başarıyla kayıt oldunuz!');
+    Clomosy.RunUnit('myForm');
+    UnitReForm.clHide;
+ 
+  } except {
+    ShowMessage('Hata: ' + LastExceptionMessage);
+  }
+}
+}
+}
+ 
+
+
+ 
+
+
+void HiddenPasswordBtnClick //gizliden görünür hale geçmesini sağlar
+{ 
+   if not Assigned(NormalPasswordBtn)
+   {
+     NormalPasswordBtn=UnitReForm.AddNewProButton(ParolaEdit,'NormalPasswordBtn','');
+     NormalPasswordBtn.Align=alRight;
+     NormalPasswordBtn.Margins.Right=10;
+     NormalPasswordBtn.Margins.Top=5;
+     NormalPasswordBtn.Margins.Bottom=5;
+     NormalPasswordBtn.Width=25;
+     UnitReForm.SetImage(NormalPasswordBtn,'https://i.imgur.com/QnWq6xy.png');
+     UnitReForm.AddNewEvent(NormalPasswordBtn,tbeOnClick,'NormalPasswordBtnClick');
+   }
+  
+   else
+   {
+     NormalPasswordBtn.Visible=True;
+   }
+   
+   ParolaEdit.Password=False; //true olsaydı *** şeklinde gözükürdü bu özelliği kapattık
+   HiddenPasswordBtn.Visible=False;
+  
+  
+  
+}
+
+void NormalPasswordBtnClick
+{
+   try
+     if not Assigned(HiddenPasswordBtn)
+     {
+       HiddenPasswordBtn=UnitReForm.AddNewProButton(ParolaEdit,'NormalPasswordBtn','');
+       HiddenPasswordBtn.Align=alRight;
+       HiddenPasswordBtn.Margins.Right=10;
+       HiddenPasswordBtn.Margins.Top=5;
+       HiddenPasswordBtn.Margins.Bottom=5;
+       HiddenPasswordBtn.Width=25;
+       UnitReForm.SetImage(NormalPasswordBtn,'https://i.imgur.com/dQ1keru.png');
+       UnitReForm.AddNewEvent(HiddenPasswordBtn,tbeOnClick,'HiddenPasswordBtnClick');
+     }
+     
+     else
+     {
+       HiddenPasswordBtn.visible=true;
+     }
+    
+      ParolaEdit.Password=true;
+      NormalPasswordBtn.visible=False;
+     
+     
+    except 
+      ShowMessage('Exception Class: '+ LastExceptionClassName + 'Exceptin name: '+ LastExceptionMessage);
+    
+    }
+  
+}
+
+
+void LabelTiklandi;
+{
+  Clomosy.RunUnit('Login');
+}
+
+
+
+
+{
+  UnitReForm=TCLForm.Create(self);
+  
+  UnitReForm.formwaiting.visible=false;
+UnitReForm.BtnGoBack.visible=false;
+UnitReForm.BtnFormMenu.visible=false;
+ 
+  
+  
+  MainPnl=UnitReForm.AddNewProPanel(UnitReForm,'MainPnl');
+  MainPnl.Align=alCenter;
+  MainPnl.Height=630;
+  MainPnl.Width=400;
+  MainPnl.clProSettings.RoundHeight=40;
+  MainPnl.clProSettings.Roundwidth=40;
+  MainPnl.clProSettings.IsTransparent =False;
+  MainPnl.SetclProSettings(MainPnl.clProSettings); 
+  
+  
+ TclLogo=UnitReForm.AddNewProImage(MainPnl,'TclLogo');  
+ TclLogo.Align=alMostTop; 
+ TclLogo.Height=100;
+ TclLogo.Margins.Top=40;
+ TclLogo.Margins.Left=20;
+ TclLogo.Margins.Right=20;
+ Tcllogo.clProSettings.PictureSource ='https://i.imgur.com/OKL3Jkx.png'; 
+ TclLogo.SetclProSettings(TclLogo.clProSettings);
+ 
+ 
+ EmailEdit=UnitReForm.AddNewProEdit(MainPnl, 'EmailEdit', 'E-posta');
+ EmailEdit.Align=alTop;
+ EmailEdit.Height=50;
+ EmailEdit.Margins.Top=20;
+ EmailEdit.Margins.Left=20; 
+ EmailEdit.Margins.Right=20;
+ EmailEdit.clProSettings.BackGroundColor=clAlphaColor.clHextoColor('#ffffff'); 
+ EmailEdit.clProSettings.IsTransparent=True;
+ EmailEdit.clProSettings.IsFill=False;
+ EmailEdit.clProSettings.IsRound=True;
+ EmailEdit.clProSettings.RoundHeight=20;
+ EmailEdit.clProSettings.Roundwidth=20;
+ EmailEdit.clProSettings.FontSize=16;//1
+ EmailEdit.clProSettings.FontColor= clAlphaColor.clHexToColor('#C68EFD');
+ EmailEdit.clProSettings.BorderColor=clAlphaColor.clHexToColor('#C68EFD');
+  EmailEdit.clProSettings.Borderwidth=1; 
+ EmailEdit.SetclProSettings(EmailEdit.clProSettings);
+
+
+
+ EmailEdit1=UnitReForm.AddNewProEdit(MainPnl, 'EmailEdit1', 'Kullanıcı Adı');
+ EmailEdit1.Align=alTop;
+ EmailEdit1.Height=50;
+ EmailEdit1.Margins.Top=20;
+ EmailEdit1.Margins.Left=20; 
+ EmailEdit1.Margins.Right=20;
+ EmailEdit1.clProSettings.BackGroundColor=clAlphaColor.clHextoColor('#ffffff'); 
+ EmailEdit1.clProSettings.IsTransparent=True;
+ EmailEdit1.clProSettings.IsFill=False;
+ EmailEdit1.clProSettings.IsRound=True;
+ EmailEdit1.clProSettings.RoundHeight=20;
+ EmailEdit1.clProSettings.Roundwidth=20;
+ EmailEdit1.clProSettings.FontSize=16;//1
+ EmailEdit1.clProSettings.FontColor= clAlphaColor.clHexToColor('#C68EFD');
+ EmailEdit1.clProSettings.BorderColor=clAlphaColor.clHexToColor('#C68EFD');
+ EmailEdit1.clProSettings.Borderwidth=1; 
+ EmailEdit1.SetclProSettings(EmailEdit1.clProSettings);
+
+
+ EmailImg=UnitReForm.AddNewProImage(EmailEdit,'EmailImg');
+ EmailImg.Align=alLeft;
+ EmailImg.Margins.Left=10; 
+ EmailImg.Margins.Top=5;
+ EmailImg.Margins.Bottom=5;
+ EmailImg.Width=25;
+ UnitReForm.SetImage(EmailEdit,'https://i.imgur.com/O0TuHrh.png');
+ 
+ 
+  
+ ParolaEdit=UnitReForm.AddNewProEdit(MainPnl, 'ParolaEdit', 'Şifre');
+ ParolaEdit.Align=alTop;
+ ParolaEdit.Height=50;
+ ParolaEdit.Margins.Top=20;
+ ParolaEdit.Margins.Left=20; 
+ ParolaEdit.Margins.Right=20;
+ ParolaEdit.clProSettings.BackGroundColor=clAlphaColor.clHextoColor('#ffffff'); 
+ ParolaEdit.clProSettings.IsTransparent=True;
+ ParolaEdit.clProSettings.IsFill=False;
+ ParolaEdit.clProSettings.IsRound=True;
+ ParolaEdit.clProSettings.RoundHeight=20;
+ ParolaEdit.clProSettings.Roundwidth=20;
+ ParolaEdit.clProSettings.FontSize=16;
+ ParolaEdit.clProSettings.FontColor= clAlphaColor.clHexToColor('#C68EFD');
+ ParolaEdit.clProSettings.BorderColor=clAlphaColor.clHexToColor('#C68EFD');
+ ParolaEdit.clProSettings.Borderwidth=1;  
+ ParolaEdit.SetclProSettings(ParolaEdit.clProSettings);
+
+ 
+ HiddenPasswordBtn=UnitReForm.AddNewProButton(ParolaEdit, 'HiddenPasswordBtn', '');
+ HiddenPasswordBtn.Align=alRight;
+ HiddenPasswordBtn.Margins.Right=10;
+ HiddenPasswordBtn.Margins.Top=5;
+ HiddenPasswordBtn.Margins.Bottom=5;
+ HiddenPasswordBtn.Width=25;
+ UnitReForm.SetImage(HiddenPasswordBtn,'https://i.imgur.com/JEGHrm8.png'); 
+ 
+
+ MyLabel1=UnitReForm.AddNewProLabel(MainPnl,'MyLabel1', 'Zaten bir hesabınız var mı? GİRİŞ YAP');
+ MyLabel1.Align = alTop;
+ MyLabel1.Margins.Top = 30;
+ MyLabel1.Margins.Left=20;
+ MyLabel1.clProSettings.FontSize = 16;
+ MyLabel1.clProSettings.FontColor = clAlphaColor.clHexToColor('#ffffff'); 
+ mylabel1.clProSettings.TextSettings.Font.Style = [fsUnderline];
+ MyLabel1.SetclProSettings(MyLabel1.clProSettings); 
+ UnitReForm.AddNewEvent(MyLabel1, tbeOnClick, 'LabelTiklandi');
+ 
+
+LoginUyeOlBtn=UnitReForm.AddNewProButton(MainPnl,'LoginUyeOlBtn','Üye Ol');
+LoginUyeOlBtn.Align=alCenter;
+LoginUyeOlBtn.Height=50;
+LoginUyeOlBtn.Width=MainPnl.Width*40/100; //yıldız
+LoginUyeOlBtn.Margins.Top=30;
+LoginUyeOlBtn.Margins.Left=20;
+LoginUyeOlBtn.Margins.Right=20;
+LoginUyeOlBtn.Margins.Bottom=70;
+LoginUyeOlBtn.clProSettings.BackGroundColor=clAlphaColor.clHextoColor('#C68EFD');
+LoginUyeOlBtn.clProSettings.RoundHeight=20;
+LoginUyeOlBtn.clProSettings.Roundwidth=20;
+LoginUyeOlBtn.clProSettings.FontColor= clAlphaColor.clHexToColor('#ffffff'); // yazı rengi
+LoginUyeOlBtn.clProSettings.BorderColor=clAlphaColor.clHexToColor('#ffffff'); 
+LoginUyeOlBtn.clProSettings.FontSize=16;
+LoginUyeOlBtn.clProSettings.Borderwidth=1;  
+LoginUyeOlBtn.SetclProSettings(LoginUyeOlBtn.clProSettings); 
+
+UnitReForm.SetFormBGImage('https://i.imgur.com/WewGyal.png');
+UnitReForm.AddNewEvent(HiddenPasswordBtn,tbeOnClick,'HiddenPasswordBtnClick');
+UnitReForm.AddNewEvent(LoginUyeOlBtn,tbeOnClick,'InsertToDatabase');
+
+
+UnitReForm.run;
+}
+
+
+
+
+
+
+
+
+
+

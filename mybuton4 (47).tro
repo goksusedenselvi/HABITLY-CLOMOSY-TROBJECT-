@@ -1,0 +1,568 @@
+var
+myForm:TclForm;
+MainPnl,mypanel,yenipanel,puanPanel:TCLProPanel;
+mybuton1,mybuton2,mybuton3,mybuton4:TClProButton;
+counter : Integer;
+magazaBaslik,magazaBaslik1,puanLabel:TClProLabel;
+coinImage:TClProImage;
+btnS,btns2,btnS3 : TclProButton;
+vScroll,vScroll2,vScroll3:TCLVertScrollBox;
+BtnCaptionArr,BtnNameArr,btnImgArr,BtnCaptionArr2,BtnNameArr2,btnImgArr2,BtnCaptionArr3,BtnNameArr3,btnImgArr3 : array of String;
+
+i : Integer;
+coinImg,coinImg2,coinImg3:TClProImage; 
+ peopleBtn,animalBtn,bitkiBtn:TClProButton;
+puanQuery,satinAlQuery: TClSQLiteQuery;
+  puan: Integer;
+btnpp1:TClProButton;
+clickedBtn:TClProButton;
+
+
+
+  
+   void mybuton2click
+  {
+    Clomosy.RunUnit('mybuton2');
+  }
+  
+  
+  
+    void mybuton3click
+  {
+    Clomosy.RunUnit('mybuton3');
+  }
+  ///////////////BURASI
+  void  satinalinanlarcreatetable
+{
+  try
+  
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'HabitTracker.db3', '');
+    Clomosy.DBSQLiteQuery.Sql.Text = 'CREATE TABLE IF NOT EXISTS satinalinanlar ('+
+      'id INTEGER PRIMARY KEY AUTOINCREMENT,'+
+      'buttonName TEXT)';
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+  
+   except 
+
+    ShowMessage('Tablo oluşturulurken hata oluştu: ' + LastExceptionMessage);
+
+  }
+
+} 
+
+  
+  
+void CreateTablePuan;
+{
+  try
+  
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'HabitTracker.db3', '');
+    Clomosy.DBSQLiteQuery.Sql.Text = 'CREATE TABLE IF NOT EXISTS PuanKayitlari ('+
+
+      'id INTEGER PRIMARY KEY AUTOINCREMENT,'+
+
+      'puan INTEGER)';
+
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+  
+   except 
+
+    ShowMessage('Tablo oluşturulurken hata oluştu: ' + LastExceptionMessage);
+
+  }
+}
+
+
+
+
+
+  
+  
+  
+
+
+void PuanLabeliGuncelle;
+{
+  
+  try 
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'HabitTracker.db3', '');
+
+    puanQuery = Clomosy.DBSQLiteQueryWith('SELECT puan FROM PuanKayitlari ORDER BY id DESC LIMIT 1');
+    puanQuery.OpenOrExecute;
+
+    if (puanQuery.Found) {
+      puan = puanQuery.FieldByName('puan').AsInteger;
+      puanLabel.Text = 'PUAN: ' + IntToStr(puan);
+    }
+    else {
+      puanLabel.Text = 'PUAN: 0';
+    }
+  
+  except 
+    ShowMessage('Puan yüklenemedi: ' + LastExceptionMessage);
+  }
+
+}
+}
+ /* void TestYes;
+ {
+ ShowMessage('Evet');
+ /*
+  try 
+ if ((clickedBtn.Hint == 'btnbit1') || (clickedBtn.Hint == 'btnbit2') || (clickedBtn.Hint == 'btnbit3') || (clickedBtn.Hint == 'btnbit4') ||  (clickedBtn.Hint == 'btnbit5')){
+ 
+  puan = puan - 200;
+}
+else if ((clickedBtn.Hint == 'btnani1') || (clickedBtn.Hint == 'btnani2') ||(clickedBtn.Hint == 'btnani3') ||(clickedBtn.Hint == 'btnani4') ||(clickedBtn.Hint == 'btnani3') ||(clickedBtn.Hint == 'btnani4')){
+       
+       
+  puan = puan - 300;
+}
+else {
+  puan = puan - 100;
+}
+ 
+    // Puan güncelleme
+    Clomosy.DBSQLiteQuery.Sql.Text = 'INSERT INTO PuanKayitlari (puan) VALUES (' + IntToStr(puan) + ')';
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+    // Satın alınan ürünü kaydetme - DÜZELTME BURADA
+    try 
+      Clomosy.DBSQLiteQuery.Sql.Text = 'INSERT INTO satinalinanlar (buttonName) VALUES (' + QuotedStr(clickedBtn.Hint) + ')';
+      Clomosy.DBSQLiteQuery.OpenOrExecute;
+      ShowMessage('Satın alma başarıyla kaydedildi!');
+    
+    except 
+      ShowMessage('Satın alma kaydedilemedi: ' + LastExceptionMessage);
+    }
+    PuanLabeliGuncelle;
+    ShowMessage('Tebrikler! Satın aldınız. Toplam puan: ' + IntToStr(puan));
+  except
+    ShowMessage('Veri eklenemedi: ' + LastExceptionMessage);
+  }
+  */
+  
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+ ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ void animalbtnclick
+ {
+   vScroll.visible=false;
+   vScroll3.visible=false;
+   vScroll2.visible=true;
+ }
+ 
+ 
+ void peoplebtnclick
+{
+  vScroll.Visible = true;
+  vScroll2.Visible = false;
+  vScroll3.Visible = false;
+}
+ 
+ 
+  void bitkibtnclick
+{
+  vScroll.Visible = false;
+  vScroll2.Visible = false;
+  vScroll3.Visible=true;
+}
+ 
+ 
+ 
+ 
+ 
+{
+
+  satinalinanlarcreatetable;
+  myForm = TclForm.Create(Self);
+  myform.SetFormBGImage('https://i.imgur.com/TjM1LNV.png');
+
+
+  
+  MainPnl = myForm.AddNewProPanel(myForm, 'MainPnl');
+  MainPnl.Align = alClient;
+  
+  MainPnl.Align=alCenter;
+  MainPnl.Height=630;
+  MainPnl.Width=400;
+  MainPnl.clProSettings.RoundHeight=40;
+  MainPnl.clProSettings.Roundwidth=40;
+  MainPnl.clProSettings.IsTransparent =False;
+  MainPnl.SetclProSettings(MainPnl.clProSettings); 
+ 
+  
+ yenipanel=myForm.AddNewProPanel(MainPnl,'yenipanel');
+ yenipanel.Align=alcenter;
+ yenipanel.Height=500;
+ yenipanel.Width=370;
+ yenipanel.margins.bottom=70;
+ yenipanel.clProSettings.RoundHeight=20;
+ yenipanel.clProSettings.Roundwidth=20;
+ yenipanel.clProSettings.IsTransparent =False;
+ yenipanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ffffff');
+ yenipanel.clProSettings.BorderWidth = 2;
+ yenipanel.SetclProSettings(yenipanel.clProSettings); 
+ 
+  
+mypanel=myForm.AddNewProPanel(MainPnl,'mypanel');
+mypanel.Align=alMostBottom;
+mypanel.Align=alHorizontal;
+mypanel.Height=200;
+mypanel.Width=300;
+mypanel.clProSettings.RoundHeight=20;
+mypanel.clProSettings.Roundwidth=20;
+mypanel.clProSettings.IsTransparent =False;
+mypanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ffffff');
+mypanel.clProSettings.BorderWidth = 2;
+mypanel.SetclProSettings(mypanel.clProSettings); 
+ 
+
+ 
+ 
+magazaBaslik = myForm.AddNewProLabel(MainPnl, 'magazaBaslik', 'PUAN MAĞAZASI');
+magazaBaslik.Align = almostTop;
+magazaBaslik.clProSettings.TextSettings.Font.Style = [fsBold];
+magazaBaslik.margins.left=110;
+magazaBaslik.Height = 30;
+magazaBaslik.clProSettings.FontSize = 20;
+magazaBaslik.clProSettings.FontColor = clAlphaColor.clHexToColor('#ff5757');
+
+magazaBaslik.SetclProSettings(magazaBaslik.clProSettings); 
+ 
+ /////////////////////PEOPLEEEEE//////////////////////////////////////////////7
+ 
+   BtnNameArr = ['btnpp1','btnpp2','btnpp3','btnpp4','btnpp5'];
+   BtnCaptionArr = ['100' ,'100','100','100','100'];
+   btnImgArr = ['https://i.imgur.com/WjyjNqj.png',
+   'https://i.imgur.com/jmjLukD.png',
+   'https://i.imgur.com/XEV1Z8v.png',
+   'https://i.imgur.com/Xb00oQ7.png',
+   'https://i.imgur.com/EL8rUNs.png'
+   
+   ];
+   
+   
+   vScroll = myForm.AddNewVertScrollBox(yenipanel,'ScrollBoxY');
+   vScroll.Align = alTop;
+   vScroll.Height = myForm.clheight-170;
+   
+   for (i = 0 to 4)
+   {
+     btnS = myForm.AddNewProButton(vScroll,BtnNameArr[i],BtnCaptionArr[i]);
+     btnS.Align = AlTop;
+     btnS.Height = 150;
+     btnS.Margins.Bottom = 5;
+     btnS.clProSettings.IsFill = True;
+     btnS.clProSettings.FontSize = 16;
+     btnS.clProSettings.FontColor = clAlphaColor.clHexToColor('#fdcc0d');
+     btnS.clProSettings.TextSettings.Font.Style = [fsBold]; //,fsItalic
+     btnS.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#fcf5bf');
+     btnS.clProSettings.FontVertAlign = palLeading;
+     btnS.clProSettings.FontHorzAlign = palcenter;
+     btnS.clProSettings.PictureSource =btnImgArr[i];
+     btnS.clProSettings.PictureAutoFit = True;
+     btnS.SetclProSettings(btnS.clProSettings);
+     btnS.Hint = BtnNameArr[i];
+     coinImg = myForm.AddNewProImage(btnS, 'conimg' + IntToStr(i));
+     coinImg.Align = AlTop;
+     coinImg.Width = 22;
+     coinImg.Height = 24;
+     coinimg.margins.right=50;
+     myForm.SetImage(coinImg, 'https://i.imgur.com/1lWcTcq.png');
+   }  
+   
+////////////////////////////ANİMALLLLLLLLLLLLLLLLLLLLL/////////////////////////////////////////////////////////
+
+  BtnNameArr2 = ['btnani1','btnani2','btnani3','btnani4','btnani5'];
+   BtnCaptionArr2 = ['300' ,'300','300','300','300'];
+   btnImgArr2 = [
+    'https://i.imgur.com/Ze6FaOu.png',
+   'https://i.imgur.com/MRrpLzP.png',
+   'https://i.imgur.com/J2hhRQK.png',
+   'https://i.imgur.com/szz8CHC.png',
+   'https://i.imgur.com/s9FRp40.png'
+   ];
+   
+   
+   vScroll2 = myForm.AddNewVertScrollBox(yenipanel,'ScrollBoxY2');
+   vScroll2.Align = alTop;
+   vScroll2.Height = myForm.clheight-170;
+   vScroll2.Visible = false;
+   for (i = 0 to 4)
+   {
+     btnS2 = myForm.AddNewProButton(vScroll2,BtnNameArr2[i],BtnCaptionArr2[i]);
+     btnS2.Align = AlTop;
+     btnS2.Height = 150;
+     btnS2.Margins.Bottom = 5;
+     btnS2.clProSettings.IsFill = True;
+     btnS2.clProSettings.FontSize = 16;
+     btnS2.clProSettings.FontColor = clAlphaColor.clHexToColor('#fdcc0d');
+     btnS2.clProSettings.TextSettings.Font.Style = [fsBold]; //,fsItalic
+     btnS2.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#fcf5bf');
+     btnS2.clProSettings.FontVertAlign = palLeading;
+     btnS2.clProSettings.FontHorzAlign = palcenter;
+     btnS2.clProSettings.PictureSource =btnImgArr2[i];
+     btnS2.clProSettings.PictureAutoFit = True;
+     btnS2.SetclProSettings(btnS2.clProSettings);
+     btnS2.Hint = BtnNameArr2[i];
+     coinImg2 = myForm.AddNewProImage(btnS2, 'conimg2' + IntToStr(i));
+     coinImg2.Align = AlTop;
+     coinImg2.Width = 22;
+     coinImg2.Height = 24;
+     coinimg2.margins.right=50;
+     myForm.SetImage(coinImg2, 'https://i.imgur.com/1lWcTcq.png');
+     
+     
+   }
+  /////////////////////////////////ÇİÇEK//////////////////////////////////
+  
+  
+  
+   BtnNameArr3 = ['btnbit1','btnbit2','btnbit3','btnbit4','btnbit5'];
+   BtnCaptionArr3 = ['200' ,'200','200','200','200'];
+   btnImgArr3 = [
+    'https://i.imgur.com/wAWb0YJ.png',
+   'https://i.imgur.com/gYg71fT.png',
+   'https://i.imgur.com/aczfu0o.png',
+   'https://i.imgur.com/BA6aPDJ.png',
+   'https://i.imgur.com/XNAWzuO.png'
+   ];
+   
+   
+   vScroll3 = myForm.AddNewVertScrollBox(yenipanel,'ScrollBoxY3');
+   vScroll3.Align = alTop;
+   vScroll3.Height = myForm.clheight-170;
+   vScroll3.Visible = false;
+   for (i = 0 to 4)
+   {
+     btnS3 = myForm.AddNewProButton(vScroll3,BtnNameArr3[i],BtnCaptionArr3[i]);
+     btnS3.Align = AlTop;
+     btnS3.Height = 150;
+     btnS3.Margins.Bottom = 5;
+     btnS3.clProSettings.IsFill = True;
+     btnS3.clProSettings.FontSize = 16;
+     btnS3.clProSettings.FontColor = clAlphaColor.clHexToColor('#fdcc0d');
+     btnS3.clProSettings.TextSettings.Font.Style = [fsBold]; //,fsItalic
+     btnS3.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#fcf5bf');
+     btnS3.clProSettings.FontVertAlign = palLeading;
+     btnS3.clProSettings.FontHorzAlign = palcenter;
+     btnS3.clProSettings.PictureSource =btnImgArr3[i];
+     btnS3.clProSettings.PictureAutoFit = True;
+     btnS3.SetclProSettings(btnS3.clProSettings);
+     btnS3.Hint = BtnNameArr3[i];
+     coinImg3 = myForm.AddNewProImage(btnS3, 'conimg3' + IntToStr(i));
+     coinImg3.Align = AlTop;
+     coinImg3.Width = 22;
+     coinImg3.Height = 24;
+     coinimg3.margins.right=50;
+     myForm.SetImage(coinImg3, 'https://i.imgur.com/1lWcTcq.png');
+     
+     
+   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+ 
+////////////////////////////////////////////////////////////////////////////////////////  
+mybuton1=myForm.AddNewProButton(mypanel, 'mybuton1', '');
+mybuton1.Align = alLeft;
+mybuton1.margins.left=50;
+mybuton1.margins.bottom=130;
+mybuton1.Width = 40;
+mybuton1.Height = 40;
+mybuton1.clProSettings.IsRound = True;
+mybuton1.clProSettings.RoundHeight = 10;
+mybuton1.clProSettings.RoundWidth = 10;
+mybuton1.SetclProSettings(mybuton1.clProSettings);
+myForm.SetImage(mybuton1,'https://i.imgur.com/KcmLm4h.png'); 
+
+mybuton2=myForm.AddNewProButton(mypanel, 'mybuton2', '');
+mybuton2.Align = alLeft;
+mybuton2.margins.left=45;
+mybuton2.margins.bottom=130;
+mybuton2.Width = 40;
+mybuton2.Height = 40;
+mybuton2.clProSettings.IsRound = True;
+mybuton2.clProSettings.RoundHeight = 10;
+mybuton2.clProSettings.RoundWidth = 10;
+mybuton2.SetclProSettings(mybuton2.clProSettings);
+myForm.SetImage(mybuton2,'https://i.imgur.com/mcpG1Ot.png'); 
+
+mybuton3=myForm.AddNewProButton(mypanel, 'mybuton3', '');
+mybuton3.Align = alLeft;
+mybuton3.margins.left=45;
+mybuton3.margins.bottom=130;
+mybuton3.Width = 40;
+mybuton3.Height = 40;
+mybuton3.clProSettings.IsRound = True;
+mybuton3.clProSettings.RoundHeight = 10;
+mybuton3.clProSettings.RoundWidth = 10;
+mybuton3.SetclProSettings(mybuton3.clProSettings);
+myForm.SetImage(mybuton3,'https://i.imgur.com/yOGrUe4.png'); 
+
+  
+mybuton4=myForm.AddNewProButton(mypanel, 'mybuton4', '');
+mybuton4.Align = alMostRight;
+mybuton4.margins.right=50;
+mybuton4.margins.bottom=130;
+mybuton4.Width = 40;
+mybuton4.Height = 40;
+mybuton4.clProSettings.IsRound = True;
+mybuton4.clProSettings.RoundHeight = 10;
+mybuton4.clProSettings.RoundWidth = 10;
+mybuton4.SetclProSettings(mybuton4.clProSettings);
+myForm.SetImage(mybuton4,'https://i.imgur.com/dKnXBVF.png'); 
+
+
+
+
+////////COİN/////////////////////////////////7
+
+
+puanPanel = myForm.AddNewProPanel(MainPnl, 'puanPanel');
+puanPanel.Align = almostTop;
+puanPanel.Height = 40;
+puanPanel.Margins.Top = 10;
+puanPanel.Margins.Left = 20;
+puanPanel.Margins.Right = 20;
+puanPanel.clProSettings.RoundHeight=20;
+puanPanel.clProSettings.Roundwidth=20;
+puanPanel.clProSettings.IsTransparent =False;
+
+puanPanel.SetclProSettings(puanPanel.clProSettings); 
+
+coinImage = myForm.AddNewProImage(puanPanel, 'coinImage');
+coinImage.Align = almostleft;
+coinImage.Width = 22;
+coinImage.Height = 24;
+myForm.SetImage(coinImage, 'https://i.imgur.com/1lWcTcq.png');
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+puanLabel = myForm.AddNewProLabel(puanPanel, 'puanLabel', 'PUAN: 0');
+puanLabel.Align = alleft;
+puanLabel.Height = 40;
+puanlabel.Width =80;
+puanLabel.Margins.Top = 10;
+puanLabel.Margins.Left = 5;
+puanLabel.clProSettings.FontSize = 15;
+puanLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#fdcc0d'); 
+puanLabel.clProSettings.TextSettings.Font.Style = [fsBold];
+puanLabel.SetclProSettings(puanLabel.clProSettings);
+
+
+puanQuery = Clomosy.DBSQLiteQueryWith('SELECT puan FROM PuanKayitlari ORDER BY id DESC LIMIT 1');
+puanQuery.OpenOrExecute;
+
+
+//////////////////////////////////////////////////////////////
+ bitkiBtn = myForm.AddNewProButton(puanPanel, 'bitkiBtn', ' ');
+  bitkiBtn.Align = alMostRight;
+ bitkiBtn.Width = 50;
+  bitkiBtn.Height = 30;
+ bitkiBtn.Margins.Right = 10;
+  bitkiBtn.clProSettings.FontSize = 12;
+ bitkiBtn.clProSettings.IsRound = True;
+ bitkiBtn.clProSettings.RoundHeight = 10;
+ bitkiBtn.clProSettings.RoundWidth = 10;
+  bitkiBtn.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ffffff');
+  bitkiBtn.clProSettings.BorderWidth = 2;
+  bitkiBtn.clProSettings.BackgroundColor=clAlphaColor.clHexToColor('#ffe499');
+  bitkiBtn.SetclProSettings(bitkiBtn.clProSettings);
+  myform.SetImage(bitkiBtn,'https://i.imgur.com/0WewgsA.png');
+ myform.AddNewEvent(bitkiBtn,tbeOnClick,'bitkibtnclick');
+
+
+
+
+
+
+ animalBtn = myForm.AddNewProButton(puanPanel, 'animalBtn', ' ');
+  animalBtn.Align = alMostRight;
+  animalBtn.Width = 50;
+  animalBtn.Height = 30;
+  animalBtn.Margins.Right = 10;
+  animalBtn.clProSettings.FontSize = 12;
+  animalBtn.clProSettings.IsRound = True;
+  animalBtn.clProSettings.RoundHeight = 10;
+  animalBtn.clProSettings.RoundWidth = 10;
+  animalBtn.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ffffff');
+  animalBtn.clProSettings.BorderWidth = 2;
+  animalBtn.clProSettings.BackgroundColor=clAlphaColor.clHexToColor('#ffe499');
+  animalBtn.SetclProSettings(animalBtn.clProSettings);
+  myform.SetImage(animalBtn,'https://i.imgur.com/Sv74BMI.png');
+  myform.AddNewEvent(animalBtn,tbeOnClick,'animalbtnclick');
+
+
+ peopleBtn = myForm.AddNewProButton(puanPanel, 'peopleBtn', ' ');
+  peopleBtn.Align = alRight;
+  peopleBtn.Width = 50;
+  peopleBtn.Height = 30;
+  peopleBtn.Margins.Right = 10;
+  peopleBtn.clProSettings.FontSize = 12;
+  peopleBtn.clProSettings.IsRound = True;
+  peopleBtn.clProSettings.RoundHeight = 10;
+  peopleBtn.clProSettings.RoundWidth = 10;
+  peopleBtn.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ffffff');
+  peopleBtn.clProSettings.BorderWidth = 2;
+  peopleBtn.clProSettings.BackgroundColor=clAlphaColor.clHexToColor('#ffe499');
+  peopleBtn.SetclProSettings(peopleBtn.clProSettings);
+  myform.SetImage(peopleBtn,'https://i.imgur.com/MpGqtuu.png');
+  myform.AddNewEvent(peopleBtn,tbeOnClick,'peoplebtnclick');
+  
+  
+  
+  
+  
+  
+ CreateTablePuan;
+  myForm.AddNewEvent(mybuton3,tbeOnClick,'mybuton3click');
+  myForm.AddNewEvent(mybuton2,tbeOnClick,'mybuton2click');
+  PuanLabeliGuncelle;
+  myForm.Run;
+}

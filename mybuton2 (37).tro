@@ -1,0 +1,942 @@
+var
+  analizForm: TclForm;
+  MainPnl,mypanel,puanpanel: TCLProPanel;
+  ListView1: TClProListView;
+  DesignerPanel1: TClProListViewDesignerPanel;
+  habitLabel: TClProLabel;
+  addBtn,gitBtn: TClProButton;
+  Edit1: TClProEdit;
+  Qry,puanQuery: TClSQLiteQuery;
+  habitId, habitName: TClProLabel;
+  SporPanel,ingPanel,medPanel,kitpanel,yeniPanel: TCLProPanel;
+  SporBaslik,ingbaslik,medbaslik,kitbaslik,yeniLabel: TClProLabel;
+  SporKapatBtn,ingKapatBtn,medKapatBtn,kitKapatBtn,yeniKapatBtn: TClProButton;
+  SporTarihLabel,ingTarihLabel,medTarihLabel,kitTarihLabel,yeniTarih: TClProLabel;
+  SporSaatLabel,ingSaatLabel,medSaatLabel,kitSaatLabel,yeniSaat: TClProLabel;
+  SporTamamlaBtn,ingTamamlaBtn,medTamamlaBtn,kitTamamlaBtn,yeniTamamlaBtn: TClProButton;
+  mybuton1,mybuton2,mybuton3,mybuton4:TClProButton;
+  puan:integer;
+  puanLabel:TClProLabel;
+  coinImage:TClProImage;
+ baslik1pnl:TCLProPanel;
+ yilbaslik:tclprolabel;
+  
+ void mybuton3click
+  {
+    Clomosy.RunUnit('mybuton3');
+  }
+  
+
+   void mybuton4click
+  {
+    Clomosy.RunUnit('mybuton4');
+  }
+  
+
+
+   void uAnasayfaclick
+  {
+    Clomosy.RunUnit('uAnasayfa');
+  }
+  
+
+
+  
+  
+void SqLiteInsertData;
+{
+  try {
+    Clomosy.DBSQLiteQuery.Sql.Text = 
+      'INSERT INTO Habits (habitId, habitName) VALUES (1, ''İngilizce Çalışmak'');' +
+      'INSERT INTO Habits (habitId, habitName) VALUES (2, ''Spor Yapmak'');' +
+      'INSERT INTO Habits (habitId, habitName) VALUES (3, ''Meditasyon'');' +
+      'INSERT INTO Habits (habitId, habitName) VALUES (4, ''Kitap Okumak'');';
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+    ShowMessage('Veriler başarıyla eklendi!');
+  }
+  except {
+    ShowMessage('Hata: ' + LastExceptionMessage);
+  }
+}
+}
+void SqLiteConnectionCreateTable;
+  var TableExists: Boolean;
+{
+  try {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'DBHabits.db3', '');
+    // Tablo var mı kontrol et
+    Clomosy.DBSQLiteQuery.Sql.Text = 'SELECT name FROM sqlite_master WHERE type="table" AND name="Habits";';
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+    TableExists = not Clomosy.DBSQLiteQuery.Eof;
+    // Tablo yoksa oluştur
+    if (not TableExists) {
+      Clomosy.DBSQLiteQuery.Sql.Text = 
+        'CREATE TABLE Habits(habitId INTEGER NOT NULL, habitName TEXT NOT NULL, PRIMARY KEY (habitId))';
+      Clomosy.DBSQLiteQuery.OpenOrExecute;
+      ShowMessage('Tablo başarıyla oluşturuldu!');
+      SqLiteInsertData;
+    }
+    else {
+      ShowMessage('Habits tablosu zaten mevcut.');
+    }
+  }
+  except {
+    ShowMessage('Hata: ' + LastExceptionMessage);
+  }
+}
+}
+void GetData;
+{
+  try {
+   Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'DBHabits.db3', '');
+    Qry = Clomosy.DBSQLiteQueryWith('SELECT habitId as clRecord_GUID, habitName from Habits');
+    Qry.OpenOrExecute;
+    if (Qry.Found) {
+      ListView1.clLoadProListViewDataFromDataset(Qry);
+    }
+  }
+  except {
+    ShowMessage('Veri yükleme hatası: ' + LastExceptionMessage);
+  }
+}
+}
+void AddHabit;
+{
+  try {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'DBHabits.db3', '');
+    Clomosy.DBSQLiteQuery.Sql.Text = 
+      'INSERT INTO Habits (habitName) VALUES (' + QuotedStr(Edit1.Text) + ')';
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+    ShowMessage('Alışkanlık eklendi: ' + Edit1.Text);
+    Edit1.Text = '';
+    GetData;
+  }
+  except {
+    ShowMessage('Ekleme hatası: ' + LastExceptionMessage);
+  }
+}
+}
+
+
+void CreateTablePuan;
+{
+  try
+  {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'ClomosyDatabase.db3', '');
+    Clomosy.DBSQLiteQuery.Sql.Text = 'CREATE TABLE IF NOT EXISTS PuanKayitlari ('+
+
+      'id INTEGER PRIMARY KEY AUTOINCREMENT,'+
+
+      'puan INTEGER)';
+
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+  }
+   except {
+
+    ShowMessage('Tablo oluşturulurken hata oluştu: ' + LastExceptionMessage);
+
+  }
+}
+}
+
+
+
+
+void PuanLabeliGuncelle;
+{
+  
+  try {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'ClomosyDatabase.db3', '');
+
+    puanQuery = Clomosy.DBSQLiteQueryWith('SELECT puan FROM PuanKayitlari ORDER BY id DESC LIMIT 1');
+    puanQuery.OpenOrExecute;
+
+    if (puanQuery.Found) {
+      puan = puanQuery.FieldByName('puan').AsInteger;
+      puanLabel.Text = 'PUAN: ' + IntToStr(puan);
+    }
+    else {
+      puanLabel.Text = 'PUAN: 0';
+    }
+  }
+  except {
+    ShowMessage('Puan yüklenemedi: ' + LastExceptionMessage);
+  }
+}
+
+}
+
+
+
+
+
+
+void TamamlaBtnclick
+{
+ 
+
+  try {
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'ClomosyDatabase.db3', '');
+
+    puanQuery = Clomosy.DBSQLiteQueryWith('SELECT puan FROM PuanKayitlari ORDER BY id DESC LIMIT 1');
+    puanQuery.OpenOrExecute;
+
+    if (puanQuery.Found) {
+      puan = puanQuery.FieldByName('puan').AsInteger;
+    }
+    else {
+      puan = 0;
+    }
+
+    puan = puan + 400;//DEĞİŞTİR BURAYIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+
+    puanQuery.Sql.Text = 'INSERT INTO PuanKayitlari (puan) VALUES (' + IntToStr(puan) + ')';
+    puanQuery.OpenOrExecute;
+
+    PuanLabeliGuncelle;
+    ShowMessage('Tebrikler! 10 puan eklendi.'+'Toplam puan: ' + IntToStr(puan));
+  }
+  except {
+    ShowMessage('Veri eklenemedi: ' + LastExceptionMessage);
+  }
+}
+    
+}    
+    
+
+// ============================================================================
+// SPOR TAKİP PANELİ
+// ============================================================================
+ 
+void SporPanelKapat;
+{
+  SporPanel.Visible = false;
+}
+ 
+
+void SporPanelOlustur;
+{
+SporPanel=analizForm.AddNewProPanel(analizForm,'SporPanel');
+ SporPanel.Align = AlCenter;
+ SporPanel.Width = 250;
+ SporPanel.Height = 380;
+ SporPanel.clProSettings.IsRound = True;
+ SporPanel.clProSettings.RoundHeight = 10;
+ SporPanel.clProSettings.RoundWidth = 10;
+ SporPanel.clProSettings.BackgroundColor=clAlphaColor.clHexToColor('#ffffff');
+ SporPanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#968fff');
+ SporPanel.clProSettings.BorderWidth = 3;
+ SporPanel.visible=false;
+ SporPanel.SetclProSettings(SporPanel.clProSettings);
+
+  // Başlık
+  SporBaslik = analizForm.AddNewProLabel(sporPanel, 'SporBaslik', 'SPOR YAPMA TAKİBİ');
+  SporBaslik.Align = alTop;
+  SporBaslik.margins.top=20;
+  SporBaslik.margins.left=5;
+  SporBaslik.Height = 60;
+  SporBaslik.clProSettings.FontSize = 16;
+  SporBaslik.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  SporBaslik.clProSettings.TextSettings.Font.Style = [fsBold];
+  SporBaslik.SetclProSettings(SporBaslik.clProSettings);
+  // Tarih bilgisi
+  SporTarihLabel = analizForm.AddNewProLabel(SporPanel, 'SporTarihLabel', 'Tarih: ' + DateToStr(Date));
+  SporTarihLabel.Align = alTop;
+  SporTarihLabel.Height = 40;
+  SporTarihLabel.Margins.Top = 20;
+  SporTarihLabel.Margins.Left = 20;
+  SporTarihLabel.Margins.Right = 20;
+  SporTarihLabel.clProSettings.FontSize = 18;
+  SporTarihLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  SporTarihLabel.SetclProSettings(SporTarihLabel.clProSettings);
+ 
+  // Saat bilgisi
+  SporSaatLabel = analizForm.AddNewProLabel(SporPanel, 'SporSaatLabel', 'Saat: ' + TimeToStr(Time));
+  SporSaatLabel.Align = alTop;
+  SporSaatLabel.Height = 40;
+  SporSaatLabel.Margins.Left = 20;
+  SporSaatLabel.Margins.Right = 20;
+  SporSaatLabel.clProSettings.FontSize = 18;
+  SporSaatLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  SporSaatLabel.SetclProSettings(SporSaatLabel.clProSettings);
+ 
+  // Tamamla butonu
+  SporTamamlaBtn = analizForm.AddNewProButton(SporPanel, 'SporTamamlaBtn', 'SPORU TAMAMLA');
+  SporTamamlaBtn.Align = alBottom;
+  SporTamamlaBtn.Height = 80;
+  SporTamamlaBtn.Margins.Bottom = 20;
+  SporTamamlaBtn.Margins.Left = 20;
+  SporTamamlaBtn.Margins.Right = 20;
+  SporTamamlaBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#4CAF50');
+  SporTamamlaBtn.clProSettings.FontColor = clAlphaColor.clWhite;
+  SporTamamlaBtn.clProSettings.FontSize = 20;
+  SporTamamlaBtn.clProSettings.IsRound = True;
+  SporTamamlaBtn.clProSettings.RoundHeight = 15;
+  SporTamamlaBtn.clProSettings.RoundWidth = 15;
+  SporTamamlaBtn.SetclProSettings(SporTamamlaBtn.clProSettings);
+  analizForm.AddNewEvent(SporTamamlaBtn, tbeOnClick, 'SporTamamla');
+ 
+  // Kapat butonu
+  SporKapatBtn = analizForm.AddNewProButton(SporPanel, 'SporKapatBtn', '❌ KAPAT');
+  SporKapatBtn.Align = alBottom;
+  SporKapatBtn.Height = 50;
+  SporKapatBtn.Margins.Bottom = 10;
+  SporKapatBtn.Margins.Left = 20;
+  SporKapatBtn.Margins.Right = 20;
+  SporKapatBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#F44336');
+  SporKapatBtn.clProSettings.FontColor = clAlphaColor.clWhite;
+  SporKapatBtn.clProSettings.IsRound = True;
+  SporKapatBtn.clProSettings.RoundHeight = 10;
+  SporKapatBtn.clProSettings.RoundWidth = 10;
+  SporKapatBtn.SetclProSettings(SporKapatBtn.clProSettings);
+  analizForm.AddNewEvent(SporKapatBtn, tbeOnClick, 'SporPanelKapat');
+}
+ // ============================================================================
+// İNGİLİZCE ÇALIŞMA TAKİP PANELİ
+// ============================================================================
+ void ingPanelKapat;
+{
+  ingPanel.Visible = false;
+}
+ 
+
+void ingPanelOlustur;
+{
+  // Ana spor paneli
+
+ ingPanel=analizForm.AddNewProPanel(analizForm,'ingPanel');
+ ingPanel.Align = AlCenter;
+ ingPanel.Width = 250;
+ ingPanel.Height = 380;
+ ingPanel.clProSettings.IsRound = True;
+ ingPanel.clProSettings.RoundHeight = 10;
+ ingPanel.clProSettings.RoundWidth = 10;
+ ingPanel.clProSettings.BackgroundColor=clAlphaColor.clHexToColor('#ffffff');
+ ingPanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#968fff');
+ ingPanel.clProSettings.BorderWidth = 3;
+ ingPanel.visible=false;
+ ingPanel.SetclProSettings(ingPanel.clProSettings);
+
+ 
+ 
+ 
+ 
+  // Başlık
+  ingbaslik = analizForm.AddNewProLabel(ingPanel, 'ingbaslik', 'İNGİLİZCE ÇALIŞMA TAKİBİ');
+  ingbaslik.Align = alTop;
+  ingbaslik.margins.top=20;
+  ingbaslik.margins.left=5;
+  ingbaslik.Height = 60;
+  ingbaslik.clProSettings.FontSize = 16;
+  ingbaslik.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  ingbaslik.clProSettings.TextSettings.Font.Style = [fsBold];
+  ingbaslik.SetclProSettings(ingbaslik.clProSettings);
+ 
+  // Tarih bilgisi
+  ingTarihLabel = analizForm.AddNewProLabel(ingPanel, 'ingTarihLabel', 'Tarih: ' + DateToStr(Date));
+  ingTarihLabel.Align = alTop;
+  ingTarihLabel.Height = 40;
+  ingTarihLabel.Margins.Top = 20;
+  ingTarihLabel.Margins.Left = 20;
+  ingTarihLabel.Margins.Right = 20;
+  ingTarihLabel.clProSettings.FontSize = 18;
+  ingTarihLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  ingTarihLabel.SetclProSettings(ingTarihLabel.clProSettings);
+ 
+  // Saat bilgisi
+  ingSaatLabel = analizForm.AddNewProLabel(ingPanel, 'ingSaatLabel', 'Saat: ' + TimeToStr(Time));
+  ingSaatLabel.Align = alTop;
+  ingSaatLabel.Height = 40;
+  ingSaatLabel.Margins.Left = 20;
+  ingSaatLabel.Margins.Right = 20;
+  ingSaatLabel.clProSettings.FontSize = 18;
+  ingSaatLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  ingSaatLabel.SetclProSettings(ingSaatLabel.clProSettings);
+ 
+  // Tamamla butonu
+  ingTamamlaBtn = analizForm.AddNewProButton(ingPanel, 'ingTamamlaBtn', 'ingilizce TAMAMLA');
+  ingTamamlaBtn.Align = alBottom;
+  ingTamamlaBtn.Height = 80;
+  ingTamamlaBtn.Margins.Bottom = 20;
+  ingTamamlaBtn.Margins.Left = 20;
+  ingTamamlaBtn.Margins.Right = 20;
+  ingTamamlaBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#4CAF50');
+  ingTamamlaBtn.clProSettings.FontColor = clAlphaColor.clWhite;
+  ingTamamlaBtn.clProSettings.FontSize = 20;
+  ingTamamlaBtn.clProSettings.IsRound = True;
+  ingTamamlaBtn.clProSettings.RoundHeight = 15;
+  ingTamamlaBtn.clProSettings.RoundWidth = 15;
+  ingTamamlaBtn.SetclProSettings(ingTamamlaBtn.clProSettings);
+  
+ 
+ingKapatBtn = analizForm.AddNewProButton(ingPanel, 'ingKapatBtn', '❌ KAPAT');
+  ingKapatBtn.Align = alBottom;
+  ingKapatBtn.Height = 50;
+  ingKapatBtn.Margins.Bottom = 10;
+  ingKapatBtn.Margins.Left = 20;
+  ingKapatBtn.Margins.Right = 20;
+  ingKapatBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#F44336');
+  ingKapatBtn.clProSettings.FontColor = clAlphaColor.clWhite;
+  ingKapatBtn.clProSettings.IsRound = True;
+  ingKapatBtn.clProSettings.RoundHeight = 10;
+  ingKapatBtn.clProSettings.RoundWidth = 10;
+  ingKapatBtn.SetclProSettings(ingKapatBtn.clProSettings);
+  analizForm.AddNewEvent(ingKapatBtn, tbeOnClick, 'ingPanelKapat');
+ }
+ 
+ // ============================================================================
+// MEDİTASYON ÇALIŞMA TAKİP PANELİ
+// ============================================================================
+ void medPanelKapat;
+{
+  medPanel.Visible = false;
+}
+ 
+
+void medPanelOlustur;
+{
+ medPanel=analizForm.AddNewProPanel(analizForm,'medPanel');
+ medPanel.Align = AlCenter;
+ medPanel.Width = 250;
+ medPanel.Height = 380;
+ medPanel.clProSettings.IsRound = True;
+ medPanel.clProSettings.RoundHeight = 10;
+ medPanel.clProSettings.RoundWidth = 10;
+ medPanel.clProSettings.BackgroundColor=clAlphaColor.clHexToColor('#ffffff');
+ medPanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#968fff');
+ medPanel.clProSettings.BorderWidth = 3;
+ medPanel.visible=false;
+ medPanel.SetclProSettings(medPanel.clProSettings);
+ 
+
+  medbaslik = analizForm.AddNewProLabel(medPanel, 'medbaslik', 'MEDİTASYON TAKİBİ');
+  medbaslik.Align = alTop;
+  medbaslik.margins.top=20;
+  medbaslik.margins.left=5;
+  medbaslik.Height = 60;
+  medbaslik.clProSettings.FontSize = 16;
+  medbaslik.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  medbaslik.clProSettings.TextSettings.Font.Style = [fsBold];
+  medbaslik.SetclProSettings(medbaslik.clProSettings);
+  // Tarih bilgisi
+  medTarihLabel = analizForm.AddNewProLabel(medPanel, 'medTarihLabel', 'Tarih: ' + DateToStr(Date));
+  medTarihLabel.Align = alTop;
+  medTarihLabel.Height = 40;
+  medTarihLabel.Margins.Top = 20;
+  medTarihLabel.Margins.Left = 20;
+  medTarihLabel.Margins.Right = 20;
+  medTarihLabel.clProSettings.FontSize = 18;
+  medTarihLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  medTarihLabel.SetclProSettings(medTarihLabel.clProSettings);
+ 
+  // Saat bilgisi
+  medSaatLabel = analizForm.AddNewProLabel(medPanel, 'medSaatLabel', 'Saat: ' + TimeToStr(Time));
+  medSaatLabel.Align = alTop;
+  medSaatLabel.Height = 40;
+  medSaatLabel.Margins.Left = 20;
+  medSaatLabel.Margins.Right = 20;
+  medSaatLabel.clProSettings.FontSize = 18;
+  medSaatLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  medSaatLabel.SetclProSettings(medSaatLabel.clProSettings);
+ 
+  // Tamamla butonu
+ medTamamlaBtn = analizForm.AddNewProButton(medPanel, 'medTamamlaBtn', 'meditasyon TAMAMLA');
+  medTamamlaBtn.Align = alBottom;
+  medTamamlaBtn.Height = 80;
+  medTamamlaBtn.Margins.Bottom = 20;
+  medTamamlaBtn.Margins.Left = 20;
+  medTamamlaBtn.Margins.Right = 20;
+  medTamamlaBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#4CAF50');
+  medTamamlaBtn.clProSettings.FontColor = clAlphaColor.clWhite;
+  medTamamlaBtn.clProSettings.FontSize = 20;
+  medTamamlaBtn.clProSettings.IsRound = True;
+  medTamamlaBtn.clProSettings.RoundHeight = 15;
+  medTamamlaBtn.clProSettings.RoundWidth = 15;
+  medTamamlaBtn.SetclProSettings(medTamamlaBtn.clProSettings);
+  
+ 
+  // Kapat butonu
+  medKapatBtn = analizForm.AddNewProButton(medPanel, 'medKapatBtn', '❌ KAPAT');
+  medKapatBtn.Align = alBottom;
+  medKapatBtn.Height = 50;
+  medKapatBtn.Margins.Bottom = 10;
+  medKapatBtn.Margins.Left = 20;
+  medKapatBtn.Margins.Right = 20;
+  medKapatBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#F44336');
+  medKapatBtn.clProSettings.FontColor = clAlphaColor.clWhite;
+  medKapatBtn.clProSettings.IsRound = True;
+  medKapatBtn.clProSettings.RoundHeight = 10;
+  medKapatBtn.clProSettings.RoundWidth = 10;
+  medKapatBtn.SetclProSettings(SporKapatBtn.clProSettings);
+  analizForm.AddNewEvent(medKapatBtn, tbeOnClick, 'medPanelKapat');
+}
+ 
+ // ============================================================================
+// KİTAP ÇALIŞMA TAKİP PANELİ
+// ============================================================================
+ void kitPanelKapat;
+{
+  kitPanel.Visible = false;
+}
+ 
+
+void kitPanelOlustur;
+{
+kitPanel=analizForm.AddNewProPanel(analizForm,'kitPanel');
+ kitPanel.Align = AlCenter;
+ kitPanel.Width = 250;
+ kitPanel.Height = 380;
+ kitPanel.clProSettings.IsRound = True;
+ kitPanel.clProSettings.RoundHeight = 10;
+ kitPanel.clProSettings.RoundWidth = 10;
+ kitPanel.clProSettings.BackgroundColor=clAlphaColor.clHexToColor('#ffffff');
+ kitPanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#968fff');
+ kitPanel.clProSettings.BorderWidth = 3;
+ kitPanel.visible=false;
+ kitPanel.SetclProSettings(kitPanel.clProSettings);
+ 
+ 
+  kitbaslik = analizForm.AddNewProLabel(kitPanel, 'kitbaslik', 'KİTAP OKUMA TAKİBİ');
+  kitbaslik.Align = alTop;
+  kitbaslik.margins.top=20;
+  kitbaslik.margins.left=5;
+ kitbaslik.Height = 60;
+  kitbaslik.clProSettings.FontSize = 16;
+  kitbaslik.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  kitbaslik.clProSettings.TextSettings.Font.Style = [fsBold];
+  kitbaslik.SetclProSettings(kitbaslik.clProSettings);
+ 
+  // Tarih bilgisi
+  kitTarihLabel = analizForm.AddNewProLabel(kitPanel, 'kitTarihLabel', 'Tarih: ' + DateToStr(Date));
+  kitTarihLabel.Align = alTop;
+  kitTarihLabel.Height = 40;
+  kitTarihLabel.Margins.Top = 20;
+  kitTarihLabel.Margins.Left = 20;
+  kitTarihLabel.Margins.Right = 20;
+  kitTarihLabel.clProSettings.FontSize = 18;
+  kitTarihLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  kitTarihLabel.SetclProSettings(kitTarihLabel.clProSettings);
+ 
+  // Saat bilgisi
+ kitSaatLabel = analizForm.AddNewProLabel(kitPanel, 'kitSaatLabel', 'Saat: ' + TimeToStr(Time));
+  kitSaatLabel.Align = alTop;
+  kitSaatLabel.Height = 40;
+  kitSaatLabel.Margins.Left = 20;
+  kitSaatLabel.Margins.Right = 20;
+ kitSaatLabel.clProSettings.FontSize = 18;
+  kitSaatLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  kitSaatLabel.SetclProSettings(kitSaatLabel.clProSettings);
+ 
+  // Tamamla butonu
+ kitTamamlaBtn = analizForm.AddNewProButton(kitPanel, 'kitTamamlaBtn', 'kitap okuma TAMAMLA');
+  kitTamamlaBtn.Align = alBottom;
+  kitTamamlaBtn.Height = 80;
+  kitTamamlaBtn.Margins.Bottom = 20;
+  kitTamamlaBtn.Margins.Left = 20;
+  kitTamamlaBtn.Margins.Right = 20;
+ kitTamamlaBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#4CAF50');
+  kitTamamlaBtn.clProSettings.FontColor = clAlphaColor.clWhite;
+  kitTamamlaBtn.clProSettings.FontSize = 20;
+ kitTamamlaBtn.clProSettings.IsRound = True;
+  kitTamamlaBtn.clProSettings.RoundHeight = 15;
+  kitTamamlaBtn.clProSettings.RoundWidth = 15;
+  kitTamamlaBtn.SetclProSettings(kitTamamlaBtn.clProSettings);
+  
+ 
+  // Kapat butonu
+  kitKapatBtn = analizForm.AddNewProButton(kitPanel, 'kitKapatBtn', '❌ KAPAT');
+  kitKapatBtn.Align = alBottom;
+  kitKapatBtn.Height = 50;
+  kitKapatBtn.Margins.Bottom = 10;
+  kitKapatBtn.Margins.Left = 20;
+  kitKapatBtn.Margins.Right = 20;
+  kitKapatBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#F44336');
+  kitKapatBtn.clProSettings.FontColor = clAlphaColor.clWhite;
+  kitKapatBtn.clProSettings.IsRound = True;
+  kitKapatBtn.clProSettings.RoundHeight = 10;
+  kitKapatBtn.clProSettings.RoundWidth = 10;
+  kitKapatBtn.SetclProSettings(SporKapatBtn.clProSettings);
+
+analizForm.AddNewEvent(kitKapatBtn, tbeOnClick, 'kitPanelKapat');
+
+//////////////////////////YENİ PANEL/////////////////////////////////////////
+
+  
+}
+ void yeniPanelKapat;
+{
+  yeniPanel.Visible = false;
+}
+ void yenipanelolustur
+ 
+
+{
+ 
+  yeniPanel=analizForm.AddNewProPanel(analizForm,'yeniPanel');
+ yeniPanel.Align = AlCenter;
+ yeniPanel.Width = 250;
+ yeniPanel.Height = 380;
+ yeniPanel.clProSettings.IsRound = True;
+ yeniPanel.clProSettings.RoundHeight = 10;
+ yeniPanel.clProSettings.RoundWidth = 10;
+ yeniPanel.clProSettings.BackgroundColor=clAlphaColor.clHexToColor('#ffffff');
+ yeniPanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#968fff');
+ yeniPanel.clProSettings.BorderWidth = 3;
+ yeniPanel.visible=false;
+ yeniPanel.SetclProSettings(yeniPanel.clProSettings);
+
+  yeniLabel = analizForm.AddNewProLabel(yeniPanel, 'yeniLabel', 'ALIŞKANLIK TAKİBİ');
+  yeniLabel.Align = alTop;
+  yeniLabel.margins.top=20;
+  yeniLabel.margins.left=5;
+ yeniLabel.Height = 60;
+  yeniLabel.clProSettings.FontSize = 16;
+  yeniLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  yeniLabel.clProSettings.TextSettings.Font.Style = [fsBold];
+  yeniLabel.SetclProSettings(yeniLabel.clProSettings);
+
+  yeniTarih = analizForm.AddNewProLabel(yeniPanel, 'yeniTarih_' , 'Tarih: ' + DateToStr(Date));
+  yeniTarih.Align = alTop;
+  yeniTarih.Height = 40;
+  yeniTarih.Margins.Top = 20;
+  yeniTarih.clProSettings.FontSize = 18;
+  yeniTarih.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  yeniTarih.SetclProSettings(yeniTarih.clProSettings);
+
+  yeniSaat = analizForm.AddNewProLabel(yeniPanel, 'yeniSaat_' , 'Saat: ' + TimeToStr(Time));
+  yeniSaat.Align = alTop;
+  yeniSaat.Height = 40;
+  yeniSaat.clProSettings.FontSize = 18;
+  yenisaat.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  yeniSaat.SetclProSettings(yeniSaat.clProSettings);
+
+  yeniTamamlaBtn = analizForm.AddNewProButton(yeniPanel, 'yeniTamamlaBtn_', 'ALIŞKANLIK TAMAMLANDI');
+  yeniTamamlaBtn.Align = alBottom;
+  yeniTamamlaBtn.Height = 80;
+  yeniTamamlaBtn.clProSettings.FontSize = 20;
+  yeniTamamlaBtn.clProSettings.FontColor = clAlphaColor.clWhite;
+  yeniTamamlaBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#4CAF50');
+  yeniTamamlaBtn.clProSettings.IsRound = true;
+  yeniTamamlaBtn.SetclProSettings(yeniTamamlaBtn.clProSettings);
+  analizForm.AddNewEvent(yeniTamamlaBtn, tbeOnClick, 'TamamlaBtnclick');
+
+  yeniKapatBtn = analizForm.AddNewProButton(yeniPanel, 'yeniKapatBtn_' , 'KAPAT');
+  yeniKapatBtn.Align = alBottom;
+  yeniKapatBtn.Height = 50;
+  yeniKapatBtn.clProSettings.FontColor = clAlphaColor.clWhite;
+  yeniKapatBtn.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#F44336');
+  yeniKapatBtn.clProSettings.IsRound = true;
+  yeniKapatBtn.SetclProSettings(yeniKapatBtn.clProSettings);
+  analizForm.AddNewEvent(yeniKapatBtn, tbeOnClick, 'YeniPanelKapat');
+}
+ 
+void CreateDesignerPanel
+{
+  DesignerPanel1 = analizForm.AddNewProListViewDesignerPanel(ListView1, 'DesignerPanel1');
+  DesignerPanel1.Height = 100;
+  DesignerPanel1.Width = 200;
+  DesignerPanel1.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#ffffff');
+  DesignerPanel1.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ea9eff');
+  DesignerPanel1.clProSettings.BorderWidth = 2;
+  DesignerPanel1.clProSettings.RoundHeight = 20;
+  DesignerPanel1.clProSettings.RoundWidth = 20;
+  DesignerPanel1.SetclProSettings(DesignerPanel1.clProSettings);
+
+  ListView1.SetDesignerPanel(DesignerPanel1);
+
+  habitName = analizForm.AddNewProLabel(DesignerPanel1, 'habitName', '-');
+  habitName.Align = alClient;
+  habitName.clProSettings.FontSize = 20;
+  habitName.Margins.Top = 10;
+  habitName.Margins.Left = 10;
+  habitName.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  habitname.SetclProSettings(habitname.clProSettings); 
+  DesignerPanel1.AddPanelObject(habitname, clText);
+ 
+  gitBtn = analizForm.AddNewProButton(DesignerPanel1, 'gitBtn', ' ');
+  gitBtn.Align = alMostRight;
+  gitBtn.Width = 40;
+  gitBtn.Height = 30;
+  gitBtn.Margins.Right = 10;
+  gitBtn.Margins.Top = 10;
+  gitBtn.clProSettings.IsRound = True;
+  gitBtn.clProSettings.FontSize = 14;
+  gitBtn.SetclProSettings(gitBtn.clProSettings);
+  analizForm.SetImage(gitBtn,'https://i.imgur.com/cf6ehZP.png');
+ 
+}
+
+ 
+ 
+void OnAddBtnClick;
+{
+  if (Edit1.Text <> '') {
+    AddHabit;
+  }
+  else {
+    ShowMessage('Lütfen bir alışkanlık adı girin!');
+  }
+}
+void CreateListView;
+{
+  ListView1 = analizForm.AddNewProListView(MainPnl, 'ListView1');
+  ListView1.Align = alClient;
+  ListView1.Margins.Bottom = 20;
+  ListView1.Margins.Top = 20;
+  ListView1.Margins.Right = 20;
+  ListView1.Margins.Left = 20;
+  ListView1.clProSettings.ViewType = lvIcon;
+  ListView1.clProSettings.ColCount = 1;
+  ListView1.clProSettings.ItemHeight = 100;
+  ListView1.clProSettings.ItemSpace = 10;
+  ListView1.clProSettings.RoundHeight = 5;
+  ListView1.clProSettings.RoundWidth = 5;
+  ListView1.SetclProSettings(ListView1.clProSettings);
+  // Tıklama olayını ekle
+  analizForm.AddNewEvent(ListView1, tbeOnItemClick, 'onItemClicked');
+}
+void onItemClicked;
+  var secilenMetin: String;
+{
+  secilenMetin = clGetStringAfter(ListView1.clSelectedItemData(clText), ': ');
+  if (secilenMetin == 'Spor Yapmak') {
+    if (SporPanel <> nil) {
+    SporPanel.Visible = true;
+    SporTarihLabel.Text = 'Tarih: ' + DateToStr(Date);
+    SporSaatLabel.Text = 'Saat: ' + TimeToStr(Time);
+  }
+  }else if (secilenMetin == 'İngilizce Çalışmak'){
+  if (ingPanel <> nil){
+     ingPanel.Visible = true;
+    ingTarihLabel.Text = 'Tarih: ' + DateToStr(Date);
+    ingSaatLabel.Text = 'Saat: ' + TimeToStr(Time);
+  }
+  }
+  else if (secilenMetin == 'Meditasyon'){
+  if (medPanel <> nil){
+     medPanel.Visible = true;
+    medTarihLabel.Text = 'Tarih: ' + DateToStr(Date);
+    medSaatLabel.Text = 'Saat: ' + TimeToStr(Time);
+ 
+  }
+  }
+  else if (secilenMetin == 'Kitap Okumak'){
+  if (kitPanel <> nil){
+     kitPanel.Visible = true;
+    kitTarihLabel.Text = 'Tarih: ' + DateToStr(Date);
+    kitSaatLabel.Text = 'Saat: ' + TimeToStr(Time);
+ 
+  }
+  }
+  else if (secilenmetin == habitname.Text){
+  if (yeniPanel <> nil){
+     YeniPanel.Visible = true;
+    YeniTarih.Text = 'Tarih: ' + DateToStr(Date);
+   yeniSaat.Text = 'Saat: ' + TimeToStr(Time);
+ 
+  }
+  }
+  else {
+    ShowMessage('Seçilen alışkanlık: ' + secilenMetin + #13#10 + 'Bu alışkanlık için henüz takip paneli oluşturulmadı.');
+  }
+}
+ 
+ 
+ 
+
+ //TASARIM ----------------------------------------------------------------------------
+{
+ analizForm=TclForm.Create(Self);
+analizForm.SetFormBGImage('https://i.imgur.com/ujt7q5c.png');
+
+
+ 
+
+  MainPnl = analizForm.AddNewProPanel(analizForm, 'MainPnl');
+  MainPnl.Align = alClient;
+  
+  MainPnl.Align=alCenter;
+  MainPnl.Height=630;
+  MainPnl.Width=400;
+  MainPnl.clProSettings.RoundHeight=40;
+  MainPnl.clProSettings.Roundwidth=40;
+  MainPnl.clProSettings.IsTransparent =False;
+  MainPnl.SetclProSettings(MainPnl.clProSettings); 
+  
+  baslik1pnl = analizForm.AddNewProPanel(MainPnl, 'baslik1pnl');
+  baslik1pnl.Align = almostTop;
+  baslik1pnl.Margins.left=11;
+  baslik1pnl.Height =60;
+  baslik1pnl.width = 200;
+ // baslik1pnl.clProSettings.RoundHeight = 10;
+ //baslik1pnl.clProSettings.RoundWidth = 10;
+  //baslik1pnl.clProSettings.BorderColor = clAlphaColor.clHexToColor('#cccccc');
+ // baslik1pnl.clProSettings.BorderWidth = 1;
+  baslik1pnl.SetclProSettings(baslik1pnl.clProSettings);
+   
+  yilbaslik = analizForm.AddNewProLabel(baslik1pnl,'yilbaslik','GÜNLÜK ALIŞKANLIK TAKİBİ');
+  yilbaslik.Align = altop;
+  yilbaslik.Width = 300;
+  yilbaslik.Height = 30;
+  yilbaslik.margins.left=50;
+  yilbaslik.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  yilbaslik.clProSettings.FontSize = 20;
+  yilbaslik.clProSettings.FontVertAlign = palcenter;
+  yilbaslik.clProSettings.FontHorzAlign = palLeading;
+  yilbaslik.clProSettings.TextSettings.Font.Style = [fsBold];
+  yilbaslik.clProSettings.IsFill = True; 
+  yilbaslik.clProSettings.IsRound = True;
+  yilbaslik.SetclProSettings(yilbaslik.clProSettings);
+  
+ puanPanel = analizForm.AddNewProPanel(MainPnl, 'puanPanel');
+puanPanel.Align = alTop;
+puanPanel.Height = 40;
+puanPanel.Margins.Top = 10;
+puanPanel.Margins.Left = 20;
+puanPanel.Margins.Right = 20;
+puanPanel.clProSettings.RoundHeight=20;
+puanPanel.clProSettings.Roundwidth=20;
+//puanPanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ea9eff');
+//puanPanel.clProSettings.BorderWidth = 4;
+puanPanel.clProSettings.IsTransparent =False;
+
+puanPanel.SetclProSettings(puanPanel.clProSettings); 
+
+coinImage = analizForm.AddNewProImage(puanPanel, 'coinImage');
+coinImage.Align = almostleft;
+coinImage.Width = 22;
+coinImage.Height = 24;
+analizForm.SetImage(coinImage, 'https://i.imgur.com/1lWcTcq.png');
+
+puanLabel = analizForm.AddNewProLabel(puanPanel, 'puanLabel', 'PUAN: 0');
+puanLabel.Align = alleft;
+puanLabel.Height = 40;
+puanlabel.Width =80;
+puanLabel.Margins.Top = 10;
+puanLabel.Margins.Left = 5;
+puanLabel.clProSettings.FontSize = 15;
+puanLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#fdcc0d'); 
+puanLabel.clProSettings.TextSettings.Font.Style = [fsBold];
+puanLabel.SetclProSettings(puanLabel.clProSettings);
+
+  
+  
+  Edit1 = analizForm.AddNewProEdit(MainPnl, 'Edit1', 'Yeni Alışkanlık Ekle...');
+  Edit1.Align = alTop;
+  Edit1.Height = 50;
+  Edit1.Margins.Top = 20;
+  Edit1.Margins.Left = 20;
+  Edit1.Margins.Right = 20;
+  Edit1.clProSettings.BackGroundColor = clAlphaColor.clHexToColor('#ffffff'); 
+  Edit1.clProSettings.IsTransparent = True;
+  Edit1.clProSettings.IsFill = False;
+  Edit1.clProSettings.IsRound = True;
+  Edit1.clProSettings.RoundHeight = 20;
+  Edit1.clProSettings.RoundWidth = 20;
+  Edit1.clProSettings.FontSize = 20;
+  Edit1.clProSettings.FontColor = clAlphaColor.clHexToColor('#000000');
+  Edit1.clProSettings.BorderColor = clAlphaColor.clHexToColor('#bb00ff');
+   Edit1.clProSettings.BorderWidth = 1;
+  Edit1.SetclProSettings(Edit1.clProSettings);
+ 
+  addBtn = analizForm.AddNewProButton(edit1, 'addBtn', '');
+  addBtn.Align = alMostRight;
+  addBtn.Height = 50;
+  addBtn.Width = 50;
+  addBtn.clProSettings.IsRound = True;
+  addBtn.SetclProSettings(addBtn.clProSettings);
+  analizForm.SetImage(addBtn,'https://i.imgur.com/WyJbxXT.png'); 
+  
+mypanel=analizForm.AddNewProPanel(MainPnl,'mypanel');
+mypanel.Align=alMostBottom;
+mypanel.Align=alHorizontal;
+mypanel.Height=200;
+mypanel.Width=300;
+mypanel.clProSettings.RoundHeight=20;
+mypanel.clProSettings.Roundwidth=20;
+mypanel.clProSettings.IsTransparent =False;
+mypanel.clProSettings.BorderColor = clAlphaColor.clHexToColor('#ffffff');
+mypanel.clProSettings.BorderWidth = 2;
+mypanel.SetclProSettings(mypanel.clProSettings); 
+
+mybuton1=analizForm.AddNewProButton(mypanel, 'mybuton1', '');
+mybuton1.Align = alLeft;
+mybuton1.margins.left=50;
+mybuton1.margins.bottom=130;
+mybuton1.Width = 40;
+mybuton1.Height = 40;
+mybuton1.clProSettings.IsRound = True;
+mybuton1.clProSettings.RoundHeight = 10;
+mybuton1.clProSettings.RoundWidth = 10;
+mybuton1.SetclProSettings(mybuton1.clProSettings);
+analizForm.SetImage(mybuton1,'https://i.imgur.com/KcmLm4h.png'); 
+
+mybuton2=analizForm.AddNewProButton(mypanel, 'mybuton2', '');
+mybuton2.Align = alLeft;
+mybuton2.margins.left=45;
+mybuton2.margins.bottom=130;
+mybuton2.Width = 40;
+mybuton2.Height = 40;
+mybuton2.clProSettings.IsRound = True;
+mybuton2.clProSettings.RoundHeight = 10;
+mybuton2.clProSettings.RoundWidth = 10;
+mybuton2.SetclProSettings(mybuton2.clProSettings);
+analizForm.SetImage(mybuton2,'https://i.imgur.com/mcpG1Ot.png'); 
+
+mybuton3=analizForm.AddNewProButton(mypanel, 'mybuton3', '');
+mybuton3.Align = alLeft;
+mybuton3.margins.left=45;
+mybuton3.margins.bottom=130;
+mybuton3.Width = 40;
+mybuton3.Height = 40;
+mybuton3.clProSettings.IsRound = True;
+mybuton3.clProSettings.RoundHeight = 10;
+mybuton3.clProSettings.RoundWidth = 10;
+mybuton3.SetclProSettings(mybuton3.clProSettings);
+analizForm.SetImage(mybuton3,'https://i.imgur.com/yOGrUe4.png'); 
+
+  
+mybuton4=analizForm.AddNewProButton(mypanel, 'mybuton4', '');
+mybuton4.Align = alMostRight;
+mybuton4.margins.right=50;
+mybuton4.margins.bottom=130;
+mybuton4.Width = 40;
+mybuton4.Height = 40;
+mybuton4.clProSettings.IsRound = True;
+mybuton4.clProSettings.RoundHeight = 10;
+mybuton4.clProSettings.RoundWidth = 10;
+mybuton4.SetclProSettings(mybuton4.clProSettings);
+analizForm.SetImage(mybuton4,'https://i.imgur.com/dKnXBVF.png'); 
+
+////////COİN/////////////////////////////////7
+
+
+
+
+////KOMUTLAR///////////////////////////////////////////////77
+
+  CreateListView;
+  CreateDesignerPanel;
+  SporPanelOlustur;
+  ingPanelOlustur;
+  medPanelOlustur;
+  kitpanelolustur;
+  yenipanelolustur;
+  SqLiteConnectionCreateTable;
+   CreateTablePuan;
+  GetData;
+  PuanLabeliGuncelle;
+  analizForm.AddNewEvent(addBtn, tbeOnClick, 'OnAddBtnClick');
+  analizForm.AddNewEvent(SporTamamlaBtn,tbeOnClick,'TamamlaBtnclick');
+  analizForm.AddNewEvent(ingTamamlaBtn,tbeOnClick,'TamamlaBtnclick');
+  analizForm.AddNewEvent(medTamamlaBtn,tbeOnClick,'TamamlaBtnclick');
+  analizForm.AddNewEvent(kitTamamlaBtn,tbeOnClick,'TamamlaBtnclick');
+  analizForm.AddNewEvent(yeniTamamlaBtn,tbeOnClick,'TamamlaBtnclick');
+analizForm.AddNewEvent(mybuton3,tbeOnClick,'mybuton3click');
+    analizForm.AddNewEvent(mybuton4,tbeOnClick,'mybuton4click');
+   analizForm.AddNewEvent(mybuton1,tbeOnClick,'uAnasayfaclick');
+  
+
+  
+  analizForm.Run;
+}
